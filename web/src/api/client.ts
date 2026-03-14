@@ -1,4 +1,4 @@
-import type { Composer, Piece, PlaySession } from './types'
+import type { Composer, Piece, PlaySession, PlayingLevel } from './types'
 
 async function req<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(path, options)
@@ -34,7 +34,7 @@ export const api = {
   },
   sessions: {
     list: (pieceId: number) => req<PlaySession[]>(`/api/pieces/${pieceId}/sessions`),
-    create: (pieceId: number, data: { notes?: string; played_at?: string }) =>
+    create: (pieceId: number, data: { notes?: string; played_at?: string; playing_level?: PlayingLevel }) =>
       req<PlaySession>(`/api/pieces/${pieceId}/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

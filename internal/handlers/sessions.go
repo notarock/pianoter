@@ -34,8 +34,12 @@ func (h *SessionHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Update piece's last_played_at
-	h.DB.Model(&models.Piece{}).Where("id = ?", pieceID).Update("last_played_at", s.PlayedAt)
+	// Update piece's last_played_at, and current_level if session has a level
+	updates := map[string]interface{}{"last_played_at": s.PlayedAt}
+	if s.PlayingLevel != "" {
+		updates["current_level"] = s.PlayingLevel
+	}
+	h.DB.Model(&models.Piece{}).Where("id = ?", pieceID).Updates(updates)
 
 	w.WriteHeader(http.StatusCreated)
 	respondJSON(w, s)

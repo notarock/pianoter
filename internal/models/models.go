@@ -18,11 +18,13 @@ type Piece struct {
 	Status       string     `json:"status"`     // wishlist, learning, active, shelved
 	StartedAt    *time.Time `json:"started_at"`
 	LastPlayedAt *time.Time `json:"last_played_at"`
+	CurrentLevel string     `json:"current_level"` // denormalized from latest session with a level
 }
 
 type PlaySession struct {
-	ID       uint      `json:"id" gorm:"primaryKey"`
-	PieceID  uint      `json:"piece_id"`
-	PlayedAt time.Time `json:"played_at" gorm:"autoCreateTime"`
-	Notes    string    `json:"notes"`
+	ID           uint      `json:"id" gorm:"primaryKey"`
+	PieceID      uint      `json:"piece_id"`
+	PlayedAt     time.Time `json:"played_at" gorm:"autoCreateTime"`
+	Notes        string    `json:"notes"`
+	PlayingLevel string    `json:"playing_level"` // optional; empty = not recorded
 }
