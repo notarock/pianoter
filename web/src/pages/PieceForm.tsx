@@ -5,7 +5,7 @@ import type { Composer, Piece } from '../api/types'
 
 export default function PieceForm() {
   const { id } = useParams<{ id: string }>()
-  const isEdit = id !== 'new'
+  const isEdit = id !== undefined
   const navigate = useNavigate()
 
   const [composers, setComposers] = useState<Composer[]>([])
