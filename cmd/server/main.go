@@ -65,6 +65,7 @@ func main() {
 			r.Post("/composers", composers.Create)
 			r.Get("/composers/{id}", composers.Get)
 			r.Put("/composers/{id}", composers.Update)
+			r.Delete("/composers/{id}", composers.Delete)
 
 			r.Get("/pieces", pieces.List)
 			r.Post("/pieces", pieces.Create)

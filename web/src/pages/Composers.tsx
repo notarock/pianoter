@@ -10,6 +10,7 @@ export default function Composers() {
   const [bornYear, setBornYear] = useState('')
   const [diedYear, setDiedYear] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [hideSystem, setHideSystem] = useState(false)
 
   const load = () => api.composers.list().then(setComposers)
 
@@ -35,9 +36,15 @@ export default function Composers() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Composers</h1>
-        <button onClick={() => setShowForm(v => !v)}>
-          {showForm ? 'Cancel' : '+ Add Composer'}
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <label style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}>
+            <input type="checkbox" checked={hideSystem} onChange={e => setHideSystem(e.target.checked)} />
+            Hide system composers
+          </label>
+          <button onClick={() => setShowForm(v => !v)}>
+            {showForm ? 'Cancel' : '+ Add Composer'}
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -62,20 +69,38 @@ export default function Composers() {
             <th style={{ textAlign: 'left', padding: '0.5rem' }}>Nationality</th>
             <th style={{ textAlign: 'left', padding: '0.5rem' }}>Born</th>
             <th style={{ textAlign: 'left', padding: '0.5rem' }}>Died</th>
+            <th style={{ padding: '0.5rem' }}></th>
           </tr>
         </thead>
         <tbody>
-          {composers.map(c => (
+          {composers.filter(c => !hideSystem || c.user_id !== 0).map(c => (
             <tr key={c.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: '0.5rem' }}>{c.name}</td>
+              <td style={{ padding: '0.5rem' }}>
+                {c.name}
+                {c.user_id === 0 && (
+                  <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '0.1rem 0.4rem', background: '#e8f0fe', color: '#1a73e8', borderRadius: 4, verticalAlign: 'middle' }}>
+                    system
+                  </span>
+                )}
+              </td>
               <td style={{ padding: '0.5rem' }}>{c.nationality || '—'}</td>
               <td style={{ padding: '0.5rem' }}>{c.born_year ?? '—'}</td>
               <td style={{ padding: '0.5rem' }}>{c.died_year ?? '—'}</td>
+              <td style={{ padding: '0.5rem', textAlign: 'right' }}>
+                {c.user_id !== 0 && (
+                  <button
+                    onClick={async () => { await api.composers.delete(c.id); load() }}
+                    style={{ padding: '0.2rem 0.5rem', background: 'none', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer', color: '#c00' }}
+                  >
+                    Delete
+                  </button>
+                )}
+              </td>
             </tr>
           ))}
           {composers.length === 0 && (
             <tr>
-              <td colSpan={4} style={{ padding: '1rem', textAlign: 'center', color: '#888' }}>
+              <td colSpan={5} style={{ padding: '1rem', textAlign: 'center', color: '#888' }}>
                 No composers yet.
               </td>
             </tr>

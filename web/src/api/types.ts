@@ -16,6 +16,7 @@ export type ComposerNationality = typeof COMPOSER_NATIONALITIES[number]
 
 export interface Composer {
   id: number
+  user_id: number
   name: string
   nationality: ComposerNationality | ''
   born_year: number | null

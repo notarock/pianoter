@@ -40,6 +40,7 @@ export const api = {
       req<Composer>('/api/composers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }),
     update: (id: number, data: Partial<Composer>) =>
       req<Composer>(`/api/composers/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }),
+    delete: (id: number) => req<void>(`/api/composers/${id}`, { method: 'DELETE' }),
   },
   pieces: {
     list: (params?: { status?: string; composer_id?: number; stale_days?: number }) => {

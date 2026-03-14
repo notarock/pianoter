@@ -18,8 +18,28 @@ type ComposerHandler struct {
 func (h *ComposerHandler) List(w http.ResponseWriter, r *http.Request) {
 	uid := userIDFromCtx(r)
 	var composers []models.Composer
-	h.DB.Where("user_id = ?", uid).Find(&composers)
+	h.DB.Where("user_id = 0 OR user_id = ?", uid).Find(&composers)
 	respondJSON(w, composers)
+}
+
+func (h *ComposerHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	uid := userIDFromCtx(r)
+	var c models.Composer
+	if result := h.DB.First(&c, id); result.Error != nil {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	if c.UserID == 0 {
+		http.Error(w, "cannot delete system composers", http.StatusForbidden)
+		return
+	}
+	if c.UserID != uid {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+	h.DB.Delete(&c)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *ComposerHandler) Create(w http.ResponseWriter, r *http.Request) {
