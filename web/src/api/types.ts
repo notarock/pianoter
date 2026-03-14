@@ -4,7 +4,7 @@ export interface User {
 }
 
 export const COMPOSER_NATIONALITIES = [
-  'American', 'Argentine', 'Australian', 'Austrian', 'Belgian', 'Bohemian',
+  'American', 'Argentine', 'Armenian', 'Australian', 'Austrian', 'Belgian', 'Bohemian',
   'Brazilian', 'British', 'Bulgarian', 'Canadian', 'Chilean', 'Chinese',
   'Czech', 'Danish', 'Dutch', 'Finnish', 'Flemish', 'French', 'Georgian',
   'German', 'Greek', 'Hungarian', 'Irish', 'Italian', 'Japanese', 'Mexican',
