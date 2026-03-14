@@ -3,9 +3,21 @@ export interface User {
   username: string
 }
 
+export const COMPOSER_NATIONALITIES = [
+  'American', 'Argentine', 'Australian', 'Austrian', 'Belgian', 'Bohemian',
+  'Brazilian', 'British', 'Bulgarian', 'Canadian', 'Chilean', 'Chinese',
+  'Czech', 'Danish', 'Dutch', 'Finnish', 'Flemish', 'French', 'Georgian',
+  'German', 'Greek', 'Hungarian', 'Irish', 'Italian', 'Japanese', 'Mexican',
+  'Norwegian', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Scottish',
+  'Spanish', 'Swedish', 'Swiss', 'Ukrainian', 'Venezuelan',
+] as const
+
+export type ComposerNationality = typeof COMPOSER_NATIONALITIES[number]
+
 export interface Composer {
   id: number
   name: string
+  nationality: ComposerNationality | ''
   born_year: number | null
   died_year: number | null
 }
