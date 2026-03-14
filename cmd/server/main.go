@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"pianoter/internal/db"
 	"pianoter/internal/handlers"
@@ -14,6 +16,11 @@ import (
 )
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "migrate" {
+		runMigrate(os.Args[2:])
+		return
+	}
+
 	database, err := db.New("pianoter.db")
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
@@ -72,4 +79,35 @@ func main() {
 
 	log.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+func runMigrate(args []string) {
+	if len(args) == 0 {
+		fmt.Fprintln(os.Stderr, "usage: pianoter migrate <up|down|up-to N|down-to N|status>")
+		os.Exit(1)
+	}
+
+	gormDB, err := db.OpenOnly("pianoter.db")
+	if err != nil {
+		log.Fatalf("failed to open database: %v", err)
+	}
+
+	direction := args[0]
+	var target int64
+
+	switch direction {
+	case "up-to", "down-to":
+		if len(args) < 2 {
+			fmt.Fprintf(os.Stderr, "usage: pianoter migrate %s N\n", direction)
+			os.Exit(1)
+		}
+		target, err = strconv.ParseInt(args[1], 10, 64)
+		if err != nil {
+			log.Fatalf("invalid version: %v", err)
+		}
+	}
+
+	if err := db.RunMigrations(gormDB, direction, target); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
 }

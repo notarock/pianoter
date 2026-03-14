@@ -1,4 +1,4 @@
-.PHONY: dev backend frontend build
+.PHONY: dev backend frontend build migrate-up migrate-down migrate-status
 
 dev:
 	@echo "Starting backend and frontend..."
@@ -15,3 +15,12 @@ frontend:
 build:
 	go build -o pianoter ./cmd/server
 	cd web && npm run build
+
+migrate-up:
+	go run ./cmd/server migrate up
+
+migrate-down:
+	go run ./cmd/server migrate down
+
+migrate-status:
+	go run ./cmd/server migrate status
