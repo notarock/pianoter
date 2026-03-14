@@ -17,7 +17,8 @@ type PieceHandler struct {
 }
 
 func (h *PieceHandler) List(w http.ResponseWriter, r *http.Request) {
-	q := h.DB.Preload("Composer")
+	uid := userIDFromCtx(r)
+	q := h.DB.Preload("Composer").Where("user_id = ?", uid)
 
 	if status := r.URL.Query().Get("status"); status != "" {
 		q = q.Where("status = ?", status)
@@ -44,6 +45,7 @@ func (h *PieceHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	p.UserID = userIDFromCtx(r)
 	if result := h.DB.Create(&p); result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
@@ -55,8 +57,9 @@ func (h *PieceHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *PieceHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	uid := userIDFromCtx(r)
 	var p models.Piece
-	if result := h.DB.Preload("Composer").First(&p, id); result.Error != nil {
+	if result := h.DB.Preload("Composer").Where("user_id = ?", uid).First(&p, id); result.Error != nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
@@ -65,8 +68,9 @@ func (h *PieceHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 func (h *PieceHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	uid := userIDFromCtx(r)
 	var p models.Piece
-	if result := h.DB.First(&p, id); result.Error != nil {
+	if result := h.DB.Where("user_id = ?", uid).First(&p, id); result.Error != nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
@@ -75,6 +79,7 @@ func (h *PieceHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p.ID = uint(id)
+	p.UserID = uid
 	h.DB.Save(&p)
 	h.DB.Preload("Composer").First(&p, p.ID)
 	respondJSON(w, p)
@@ -82,8 +87,14 @@ func (h *PieceHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 func (h *PieceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	if result := h.DB.Delete(&models.Piece{}, id); result.Error != nil {
+	uid := userIDFromCtx(r)
+	result := h.DB.Where("user_id = ? AND id = ?", uid, id).Delete(&models.Piece{})
+	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+	if result.RowsAffected == 0 {
+		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

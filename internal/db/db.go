@@ -12,7 +12,7 @@ func New(path string) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = db.AutoMigrate(&models.Composer{}, &models.Piece{}, &models.PlaySession{})
+	err = db.AutoMigrate(&models.User{}, &models.Composer{}, &models.Piece{}, &models.PlaySession{})
 	if err != nil {
 		return nil, err
 	}

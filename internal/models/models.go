@@ -2,8 +2,16 @@ package models
 
 import "time"
 
+type User struct {
+	ID           uint      `json:"id" gorm:"primaryKey"`
+	Username     string    `json:"username" gorm:"uniqueIndex;not null"`
+	PasswordHash string    `json:"-" gorm:"not null"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
 type Composer struct {
 	ID       uint    `json:"id" gorm:"primaryKey"`
+	UserID   uint    `json:"user_id"`
 	Name     string  `json:"name" gorm:"not null"`
 	BornYear *int    `json:"born_year"`
 	DiedYear *int    `json:"died_year"`
@@ -11,6 +19,7 @@ type Composer struct {
 
 type Piece struct {
 	ID           uint       `json:"id" gorm:"primaryKey"`
+	UserID       uint       `json:"user_id"`
 	Title        string     `json:"title" gorm:"not null"`
 	ComposerID   uint       `json:"composer_id"`
 	Composer     Composer   `json:"composer" gorm:"foreignKey:ComposerID"`

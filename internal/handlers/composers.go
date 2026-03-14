@@ -16,8 +16,9 @@ type ComposerHandler struct {
 }
 
 func (h *ComposerHandler) List(w http.ResponseWriter, r *http.Request) {
+	uid := userIDFromCtx(r)
 	var composers []models.Composer
-	h.DB.Find(&composers)
+	h.DB.Where("user_id = ?", uid).Find(&composers)
 	respondJSON(w, composers)
 }
 
@@ -27,6 +28,7 @@ func (h *ComposerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	c.UserID = userIDFromCtx(r)
 	if result := h.DB.Create(&c); result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
