@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  tuyauterie-backend:
+    uses: notarock/tuyauterie/.github/workflows/tuyauterie.yml@main
+    with:
+      github-event: ${{ github.event_name }}
+    secrets:
+      GITOPS_REPOSITORY_TOKEN: ${{ secrets.GITOPS_REPOSITORY_TOKEN }}
+
+  tuyauterie-web:
+    uses: notarock/tuyauterie/.github/workflows/tuyauterie.yml@main
+    with:
+      github-event: ${{ github.event_name }}
+      tuyauterie-path: 'web/.tuyauterie.yaml'
+    secrets:
+      GITOPS_REPOSITORY_TOKEN: ${{ secrets.GITOPS_REPOSITORY_TOKEN }}

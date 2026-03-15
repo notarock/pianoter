@@ -1,0 +1,10 @@
+version: 1
+
+build:
+  type: node
+  upload_artifacts: false
+  path: web
+
+release:
+  rolling: false
+  on-tag: true
