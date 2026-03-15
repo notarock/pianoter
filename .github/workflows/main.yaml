@@ -1,4 +1,9 @@
-name: CI
+name: Tuyauterie
+
+permissions:
+  packages: write
+  contents: read
+  id-token: write
 
 on:
   push:
