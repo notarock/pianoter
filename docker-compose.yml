@@ -1,0 +1,20 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+    volumes:
+      - ./pianoter.db:/app/pianoter.db
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
