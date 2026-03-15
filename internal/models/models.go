@@ -10,12 +10,12 @@ type User struct {
 }
 
 type Composer struct {
-	ID          uint    `json:"id" gorm:"primaryKey"`
-	UserID      uint    `json:"user_id"`
-	Name        string  `json:"name" gorm:"not null"`
-	Nationality string  `json:"nationality"`
-	BornYear    *int    `json:"born_year"`
-	DiedYear    *int    `json:"died_year"`
+	ID          uint   `json:"id" gorm:"primaryKey"`
+	UserID      uint   `json:"user_id"`
+	Name        string `json:"name" gorm:"not null"`
+	Nationality string `json:"nationality"`
+	BornYear    *int   `json:"born_year"`
+	DiedYear    *int   `json:"died_year"`
 }
 
 type Piece struct {
