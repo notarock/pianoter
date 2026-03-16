@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -15,9 +15,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func main() {
+func Run() {
 	if len(os.Args) > 1 && os.Args[1] == "migrate" {
-		runMigrate(os.Args[2:])
+		RunMigrate(os.Args[2:])
 		return
 	}
 
@@ -82,7 +82,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func runMigrate(args []string) {
+func RunMigrate(args []string) {
 	if len(args) == 0 {
 		fmt.Fprintln(os.Stderr, "usage: pianoter migrate <up|down|up-to N|down-to N|status>")
 		os.Exit(1)
