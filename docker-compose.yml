@@ -1,14 +1,37 @@
 services:
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: pianoter
+      MARIADB_USER: pianoter
+      MARIADB_PASSWORD: pianoter
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       JWT_SECRET: ${JWT_SECRET:-changeme}
-    volumes:
-      - ./pianoter.db:/app/pianoter.db
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_USER: pianoter
+      DB_PASSWORD: pianoter
+      DB_NAME: pianoter
     ports:
       - "8080:8080"
+    depends_on:
+      mariadb:
+        condition: service_healthy
 
   frontend:
     build:
@@ -18,3 +41,6 @@ services:
       - "80:80"
     depends_on:
       - backend
+
+volumes:
+  mariadb_data:

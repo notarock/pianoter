@@ -1,26 +1,26 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS users (
-    id            INTEGER  PRIMARY KEY AUTOINCREMENT,
+    id            INT      PRIMARY KEY AUTO_INCREMENT,
     username      TEXT     NOT NULL UNIQUE,
     password_hash TEXT     NOT NULL,
     created_at    DATETIME
 );
 
 CREATE TABLE IF NOT EXISTS composers (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id     INTEGER NOT NULL DEFAULT 0,
+    id          INT PRIMARY KEY AUTO_INCREMENT,
+    user_id     INT NOT NULL DEFAULT 0,
     name        TEXT    NOT NULL,
     nationality TEXT,
-    born_year   INTEGER,
-    died_year   INTEGER
+    born_year   INT,
+    died_year   INT
 );
 
 CREATE TABLE IF NOT EXISTS pieces (
-    id             INTEGER  PRIMARY KEY AUTOINCREMENT,
-    user_id        INTEGER  NOT NULL DEFAULT 0,
+    id             INT      PRIMARY KEY AUTO_INCREMENT,
+    user_id        INT      NOT NULL DEFAULT 0,
     title          TEXT     NOT NULL,
-    composer_id    INTEGER  NOT NULL,
-    difficulty     INTEGER,
+    composer_id    INT      NOT NULL,
+    difficulty     INT,
     status         TEXT,
     started_at     DATETIME,
     last_played_at DATETIME,
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS pieces (
 );
 
 CREATE TABLE IF NOT EXISTS play_sessions (
-    id            INTEGER  PRIMARY KEY AUTOINCREMENT,
-    piece_id      INTEGER  NOT NULL,
+    id            INT      PRIMARY KEY AUTO_INCREMENT,
+    piece_id      INT      NOT NULL,
     played_at     DATETIME NOT NULL,
     notes         TEXT,
     playing_level TEXT

@@ -3,17 +3,17 @@ package db
 import (
 	"fmt"
 
-	"github.com/glebarez/sqlite"
 	"github.com/pressly/goose/v3"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-func OpenOnly(path string) (*gorm.DB, error) {
-	return gorm.Open(sqlite.Open(path), &gorm.Config{})
+func OpenOnly(dsn string) (*gorm.DB, error) {
+	return gorm.Open(mysql.Open(dsn), &gorm.Config{})
 }
 
-func New(path string) (*gorm.DB, error) {
-	db, err := OpenOnly(path)
+func New(dsn string) (*gorm.DB, error) {
+	db, err := OpenOnly(dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func RunMigrations(gormDB *gorm.DB, direction string, target int64) error {
 	}
 
 	goose.SetBaseFS(migrationsFS)
-	if err := goose.SetDialect("sqlite3"); err != nil {
+	if err := goose.SetDialect("mysql"); err != nil {
 		return fmt.Errorf("setting dialect: %w", err)
 	}
 

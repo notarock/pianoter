@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 
+	"pianoter/internal/config"
 	"pianoter/internal/db"
 	"pianoter/internal/handlers"
 	authmw "pianoter/internal/middleware"
@@ -21,17 +22,14 @@ func Run() {
 		return
 	}
 
-	database, err := db.New("pianoter.db")
+	cfg := config.Load()
+
+	database, err := db.New(cfg.DSN())
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
 	}
 
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		jwtSecret = "dev-secret-change-in-production"
-	}
-
-	auth := &handlers.AuthHandler{DB: database, Secret: jwtSecret}
+	auth := &handlers.AuthHandler{DB: database, Secret: cfg.JWTSecret}
 	composers := &handlers.ComposerHandler{DB: database}
 	pieces := &handlers.PieceHandler{DB: database}
 	sessions := &handlers.SessionHandler{DB: database}
@@ -59,7 +57,7 @@ func Run() {
 
 		// Protected routes
 		r.Group(func(r chi.Router) {
-			r.Use(authmw.Authenticate(jwtSecret))
+			r.Use(authmw.Authenticate(cfg.JWTSecret))
 
 			r.Get("/composers", composers.List)
 			r.Post("/composers", composers.Create)
@@ -78,8 +76,8 @@ func Run() {
 		})
 	})
 
-	log.Println("Listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Printf("Listening on :%s", cfg.Port)
+	log.Fatal(http.ListenAndServe(":"+cfg.Port, r))
 }
 
 func RunMigrate(args []string) {
@@ -88,7 +86,8 @@ func RunMigrate(args []string) {
 		os.Exit(1)
 	}
 
-	gormDB, err := db.OpenOnly("pianoter.db")
+	cfg := config.Load()
+	gormDB, err := db.OpenOnly(cfg.DSN())
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
 	}
