@@ -4,6 +4,7 @@ build:
   type: node
   upload_artifacts: false
   path: web
+  artifact_name: pianoter-web
 
 release:
   rolling: false

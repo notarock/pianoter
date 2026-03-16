@@ -3,6 +3,7 @@ version: 1
 build:
   type: golang
   dockerfile: Dockerfile
+  artifact_name: pianoter-backend
 
 release:
   rolling: false
