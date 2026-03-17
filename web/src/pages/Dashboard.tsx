@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Piece } from '../api/types'
+import { useAuth } from '../context/AuthContext'
 
 export default function Dashboard() {
+  const { user } = useAuth()
   const [stale, setStale] = useState<Piece[]>([])
   const [all, setAll] = useState<Piece[]>([])
 
@@ -16,7 +18,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1>Dashboard</h1>
+      <h1>Welcome back, {user?.username} 👋</h1>
 
       <div style={{ display: 'flex', gap: '1rem', margin: '1rem 0' }}>
         {([
