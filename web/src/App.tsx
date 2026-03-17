@@ -18,9 +18,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function Nav() {
   const { user, token, logout } = useAuth()
   const style = ({ isActive }: { isActive: boolean }) => ({
-    fontWeight: isActive ? 'bold' : 'normal',
+    fontWeight: isActive ? '600' : 'normal',
     textDecoration: 'none',
-    color: isActive ? '#3182ce' : '#333',
+    color: isActive ? '#3182ce' : '#555',
+    borderBottom: isActive ? '2px solid #3182ce' : '2px solid transparent',
+    paddingBottom: '2px',
   })
   return (
     <nav style={{ display: 'flex', gap: '1.5rem', padding: '1rem 2rem', borderBottom: '1px solid #e2e8f0', background: '#fff', alignItems: 'center' }}>
