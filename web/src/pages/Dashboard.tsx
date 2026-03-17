@@ -19,10 +19,15 @@ export default function Dashboard() {
       <h1>Dashboard</h1>
 
       <div style={{ display: 'flex', gap: '1rem', margin: '1rem 0' }}>
-        {(['wishlist', 'learning', 'active', 'shelved'] as const).map(s => (
-          <div key={s} style={{ padding: '1rem', background: '#f5f5f5', borderRadius: 8, minWidth: 100, textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{byStatus(s)}</div>
-            <div style={{ textTransform: 'capitalize', color: '#666' }}>{s}</div>
+        {([
+          { status: 'wishlist', bg: '#ebf8ff', color: '#2b6cb0', accent: '#3182ce' },
+          { status: 'learning', bg: '#fffbeb', color: '#92400e', accent: '#d97706' },
+          { status: 'active',   bg: '#f0fff4', color: '#276749', accent: '#38a169' },
+          { status: 'shelved',  bg: '#f7fafc', color: '#4a5568', accent: '#718096' },
+        ] as const).map(({ status, bg, color, accent }) => (
+          <div key={status} style={{ padding: '1rem', background: bg, borderRadius: 8, minWidth: 100, textAlign: 'center', borderTop: `3px solid ${accent}` }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: accent }}>{byStatus(status)}</div>
+            <div style={{ textTransform: 'capitalize', color }}>{status}</div>
           </div>
         ))}
       </div>
