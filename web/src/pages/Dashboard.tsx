@@ -32,6 +32,17 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {all.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '3rem 1rem', border: '1px dashed #cbd5e0', borderRadius: 12, margin: '1.5rem 0', color: '#888' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎼</div>
+          <div style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '0.4rem', color: '#333' }}>Your repertoire is empty</div>
+          <div style={{ marginBottom: '1.25rem' }}>Add pieces to start tracking your practice.</div>
+          <Link to="/repertoire">
+            <button style={{ background: '#3182ce', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, padding: '0.5rem 1.2rem', cursor: 'pointer' }}>Go to Repertoire</button>
+          </Link>
+        </div>
+      )}
+
       <h2>To Revisit (not played in 30+ days)</h2>
       {stale.length === 0 ? (
         <p style={{ color: '#888' }}>All caught up! No pieces overdue for practice.</p>
