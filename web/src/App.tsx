@@ -35,7 +35,7 @@ function Nav() {
       {user && (
         <span style={{ marginLeft: 'auto', display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <span style={{ color: '#666', fontSize: '0.9rem' }}>{user.username}</span>
-          <button onClick={logout} style={{ cursor: 'pointer', padding: '0.3rem 0.8rem' }}>Logout</button>
+          <button onClick={logout} style={{ cursor: 'pointer', background: 'none', border: 'none', color: '#888', fontSize: '0.9rem', padding: 0 }}>Logout</button>
         </span>
       )}
     </nav>
