@@ -23,9 +23,9 @@ export default function Login() {
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: '6rem auto', padding: '2rem', border: '1px solid #e2e8f0', borderRadius: 8 }}>
-      <h2 style={{ marginBottom: '1.5rem' }}>Sign in to Pianoter</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div style={{ maxWidth: 400, margin: '6rem auto', padding: '2.5rem', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
+      <h2 style={{ marginBottom: '2rem', textAlign: 'center' }}>Sign in to Pianoter</h2>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <div>
           <label style={{ display: 'block', marginBottom: 4 }}>Username</label>
           <input
