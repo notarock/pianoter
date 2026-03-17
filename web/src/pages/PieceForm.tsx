@@ -47,8 +47,8 @@ export default function PieceForm() {
   }
 
   return (
-    <div style={{ maxWidth: 480 }}>
-      <h1>{isEdit ? 'Edit Piece' : 'Add Piece'}</h1>
+    <div style={{ maxWidth: 480, margin: '2rem auto', padding: '2.5rem', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
+      <h1 style={{ textAlign: 'center', marginTop: 0 }}>{isEdit ? 'Edit Piece' : 'Add Piece'}</h1>
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <label>
           Title
