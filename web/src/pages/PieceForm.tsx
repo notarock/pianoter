@@ -81,6 +81,9 @@ export default function PieceForm() {
         <button type="submit" style={{ padding: '0.75rem', background: '#3182ce', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: '1rem' }}>
           {isEdit ? 'Save Changes' : 'Add Piece'}
         </button>
+        <button type="button" onClick={() => navigate(-1)} style={{ padding: '0.75rem', background: 'none', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer', fontSize: '1rem' }}>
+          Cancel
+        </button>
       </form>
     </div>
   )
