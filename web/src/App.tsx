@@ -16,7 +16,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function Nav() {
-  const { user, logout } = useAuth()
+  const { user, token, logout } = useAuth()
   const style = ({ isActive }: { isActive: boolean }) => ({
     fontWeight: isActive ? 'bold' : 'normal',
     textDecoration: 'none',
@@ -25,9 +25,13 @@ function Nav() {
   return (
     <nav style={{ display: 'flex', gap: '1.5rem', padding: '1rem 2rem', borderBottom: '1px solid #e2e8f0', background: '#fff', alignItems: 'center' }}>
       <span style={{ fontWeight: 'bold', fontSize: '1.1rem', marginRight: '1rem' }}>🎹 Pianoter</span>
-      <NavLink to="/" end style={style}>Dashboard</NavLink>
-      <NavLink to="/repertoire" style={style}>Repertoire</NavLink>
-      <NavLink to="/composers" style={style}>Composers</NavLink>
+      {token && (
+        <>
+          <NavLink to="/" end style={style}>Dashboard</NavLink>
+          <NavLink to="/repertoire" style={style}>Repertoire</NavLink>
+          <NavLink to="/composers" style={style}>Composers</NavLink>
+        </>
+      )}
       {user && (
         <span style={{ marginLeft: 'auto', display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <span style={{ color: '#666', fontSize: '0.9rem' }}>{user.username}</span>
