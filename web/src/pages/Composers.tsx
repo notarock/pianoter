@@ -41,7 +41,7 @@ export default function Composers() {
             <input type="checkbox" checked={hideSystem} onChange={e => setHideSystem(e.target.checked)} />
             Hide system composers
           </label>
-          <button onClick={() => setShowForm(v => !v)}>
+          <button onClick={() => setShowForm(v => !v)} style={showForm ? { cursor: 'pointer', padding: '0.4rem 0.9rem' } : { background: '#3182ce', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, padding: '0.4rem 0.9rem', cursor: 'pointer' }}>
             {showForm ? 'Cancel' : '+ Add Composer'}
           </button>
         </div>
