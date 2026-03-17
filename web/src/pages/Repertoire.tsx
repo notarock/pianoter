@@ -31,7 +31,7 @@ export default function Repertoire() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Repertoire</h1>
         <Link to="/pieces/new">
-          <button>+ Add Piece</button>
+          <button style={{ background: '#3182ce', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, padding: '0.4rem 0.9rem', cursor: 'pointer' }}>+ Add Piece</button>
         </Link>
       </div>
 
