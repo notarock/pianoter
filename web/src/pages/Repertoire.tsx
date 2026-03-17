@@ -77,8 +77,21 @@ export default function Repertoire() {
           ))}
           {pieces.length === 0 && (
             <tr>
-              <td colSpan={5} style={{ padding: '1rem', textAlign: 'center', color: '#888' }}>
-                No pieces found.
+              <td colSpan={5}>
+                {!status && !composerId ? (
+                  <div style={{ padding: '3rem', textAlign: 'center' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎹</div>
+                    <div style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '0.4rem', color: '#333' }}>No pieces yet</div>
+                    <div style={{ color: '#888', marginBottom: '1.25rem' }}>Start building your repertoire by adding your first piece.</div>
+                    <Link to="/pieces/new">
+                      <button style={{ background: '#3182ce', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, padding: '0.5rem 1.2rem', cursor: 'pointer' }}>+ Add your first piece</button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>
+                    No pieces match your filters.
+                  </div>
+                )}
               </td>
             </tr>
           )}
