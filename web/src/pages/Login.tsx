@@ -47,7 +47,7 @@ export default function Login() {
           />
         </div>
         {error && <p style={{ color: 'red', margin: 0 }}>{error}</p>}
-        <button type="submit" style={{ padding: '0.6rem', cursor: 'pointer' }}>Sign in</button>
+        <button type="submit" style={{ padding: '0.6rem', cursor: 'pointer', background: '#3182ce', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, fontSize: '1rem' }}>Sign in</button>
       </form>
       <p style={{ marginTop: '1rem', textAlign: 'center' }}>
         No account? <Link to="/register">Register</Link>
