@@ -4,6 +4,7 @@ build:
   type: golang
   dockerfile: Dockerfile
   artifact_name: pianoter-backend
+  upload_artifact: false
 
 release:
   rolling: false
