@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   Title, Group, Button, Badge, Stack, Table,
-  Text, Textarea, NativeSelect, Box, Timeline, Breadcrumbs, Anchor, Progress,
+  Text, Textarea, NativeSelect, Box, Timeline, Breadcrumbs, Anchor, Progress, Modal,
 } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import { api } from '../api/client'
 import { PLAYING_LEVELS } from '../api/types'
 import type { Piece, PlaySession, PlayingLevel } from '../api/types'
@@ -28,6 +29,7 @@ export default function PieceDetail() {
   const [notes, setNotes] = useState('')
   const [playingLevel, setPlayingLevel] = useState<PlayingLevel | ''>('')
   const [logging, setLogging] = useState(false)
+  const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure(false)
 
   const load = () => {
     const numId = Number(id)
@@ -49,7 +51,6 @@ export default function PieceDetail() {
   }
 
   const deletePiece = async () => {
-    if (!confirm('Delete this piece?')) return
     await api.pieces.delete(Number(id))
     navigate('/repertoire')
   }
@@ -77,7 +78,7 @@ export default function PieceDetail() {
         <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{piece.title}</Title>
         <Group gap="sm">
           <Button component={Link} to={`/pieces/${id}/edit`} variant="default">Edit</Button>
-          <Button onClick={deletePiece} color="red" variant="light">Delete</Button>
+          <Button onClick={openDelete} color="red" variant="light">Delete</Button>
         </Group>
       </Group>
 
@@ -224,6 +225,23 @@ export default function PieceDetail() {
           </Timeline>
         )}
       </Box>
+
+      {/* Delete confirmation modal */}
+      <Modal
+        opened={deleteOpened}
+        onClose={closeDelete}
+        title="Delete piece?"
+        centered
+        size="sm"
+      >
+        <Text size="sm" c="dimmed" mb="lg">
+          This will permanently delete <strong>{piece.title}</strong> and all its practice sessions. This cannot be undone.
+        </Text>
+        <Group justify="flex-end">
+          <Button variant="default" onClick={closeDelete}>Cancel</Button>
+          <Button color="red" onClick={deletePiece}>Delete</Button>
+        </Group>
+      </Modal>
     </Stack>
   )
 }
