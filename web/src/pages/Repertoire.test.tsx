@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Repertoire from './Repertoire'
@@ -52,13 +52,11 @@ describe('Repertoire page', () => {
   it('renders a status filter dropdown with all status options', async () => {
     renderWithProviders(<Repertoire />)
     await screen.findByRole('heading', { name: /repertoire/i })
-    const selects = screen.getAllByRole('combobox')
-    expect(selects.length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText(/all statuses/i)).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /wishlist/i })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /learning/i })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /active/i })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /shelved/i })).toBeInTheDocument()
+    // Mantine Select renders options in the DOM even when the dropdown is closed
+    expect(screen.getByRole('option', { name: /wishlist/i, hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /learning/i, hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /active/i, hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /shelved/i, hidden: true })).toBeInTheDocument()
   })
 
   it('renders the composer filter dropdown', async () => {
@@ -78,7 +76,8 @@ describe('Repertoire page', () => {
   it('renders empty state when no pieces exist', async () => {
     renderWithProviders(<Repertoire />)
     expect(await screen.findByText(/no pieces yet/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /add your first piece/i })).toBeInTheDocument()
+    // Mantine Button component={Link} renders as an <a> element
+    expect(screen.getByRole('link', { name: /add your first piece/i })).toBeInTheDocument()
   })
 
   it('renders a row for each piece with a link to its detail page', async () => {
@@ -98,9 +97,9 @@ describe('Repertoire page', () => {
   it('shows "no pieces match your filters" when filters are active but no results', async () => {
     renderWithProviders(<Repertoire />)
     await screen.findByRole('heading', { name: /repertoire/i })
-    // select the status filter (first combobox)
-    const selects = screen.getAllByRole('combobox')
-    await userEvent.selectOptions(selects[0], 'wishlist')
+    // Mantine Select renders options in DOM even when closed; use fireEvent to select one
+    const wishlistOption = screen.getByRole('option', { name: /wishlist/i, hidden: true })
+    fireEvent.click(wishlistOption)
     expect(await screen.findByText(/no pieces match your filters/i)).toBeInTheDocument()
   })
 })

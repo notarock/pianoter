@@ -1,102 +1,119 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  Title, Group, Button, Select, Table, Badge,
+  Anchor, Text, Center, Stack,
+} from '@mantine/core'
 import { api } from '../api/client'
 import type { Piece, Composer } from '../api/types'
+import { statusColor, formatDate } from '../utils'
 
 export default function Repertoire() {
   const [pieces, setPieces] = useState<Piece[]>([])
   const [composers, setComposers] = useState<Composer[]>([])
-  const [status, setStatus] = useState('')
-  const [composerId, setComposerId] = useState('')
-
-  const load = () => {
-    api.pieces
-      .list({
-        status: status || undefined,
-        composer_id: composerId ? Number(composerId) : undefined,
-      })
-      .then(setPieces)
-  }
+  const [status, setStatus] = useState<string | null>(null)
+  const [composerId, setComposerId] = useState<string | null>(null)
 
   useEffect(() => {
     api.composers.list().then(setComposers)
   }, [])
 
   useEffect(() => {
-    load()
+    api.pieces
+      .list({
+        status: status || undefined,
+        composer_id: composerId ? Number(composerId) : undefined,
+      })
+      .then(setPieces)
   }, [status, composerId])
 
+  const composerOptions = [
+    { value: '', label: 'All composers' },
+    ...composers.map(c => ({ value: String(c.id), label: c.name })),
+  ]
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Repertoire</h1>
-        <Link to="/pieces/new">
-          <button style={{ background: '#3182ce', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, padding: '0.4rem 0.9rem', cursor: 'pointer' }}>+ Add Piece</button>
-        </Link>
-      </div>
+    <Stack gap="lg">
+      <Group justify="space-between" align="center">
+        <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>Repertoire</Title>
+        <Button component={Link} to="/pieces/new">+ Add Piece</Button>
+      </Group>
 
-      <div style={{ display: 'flex', gap: '1rem', margin: '1rem 0' }}>
-        <select value={status} onChange={e => setStatus(e.target.value)}>
-          <option value="">All statuses</option>
-          <option value="wishlist">Wishlist</option>
-          <option value="learning">Learning</option>
-          <option value="active">Active</option>
-          <option value="shelved">Shelved</option>
-        </select>
-        <select value={composerId} onChange={e => setComposerId(e.target.value)}>
-          <option value="">All composers</option>
-          {composers.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-      </div>
+      {/* Filters */}
+      <Group gap="sm">
+        <Select
+          placeholder="All statuses"
+          value={status}
+          onChange={setStatus}
+          clearable
+          data={[
+            { value: 'wishlist', label: 'Wishlist' },
+            { value: 'learning', label: 'Learning' },
+            { value: 'active',   label: 'Active'   },
+            { value: 'shelved',  label: 'Shelved'  },
+          ]}
+          w={160}
+        />
+        <Select
+          placeholder="All composers"
+          value={composerId}
+          onChange={setComposerId}
+          clearable
+          searchable
+          data={composerOptions.slice(1)}
+          w={220}
+        />
+      </Group>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ background: '#f5f5f5' }}>
-            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Title</th>
-            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Composer</th>
-            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Difficulty</th>
-            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Status</th>
-            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Last Played</th>
-          </tr>
-        </thead>
-        <tbody>
+      {/* Table — always rendered so headers are always visible */}
+      <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
+        <Table.Thead style={{ background: '#f9f7f4' }}>
+          <Table.Tr>
+            <Table.Th>Title</Table.Th>
+            <Table.Th>Composer</Table.Th>
+            <Table.Th>Difficulty</Table.Th>
+            <Table.Th>Status</Table.Th>
+            <Table.Th>Last Played</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
           {pieces.map(p => (
-            <tr key={p.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: '0.5rem' }}>
-                <Link to={`/pieces/${p.id}`}>{p.title}</Link>
-              </td>
-              <td style={{ padding: '0.5rem' }}>{p.composer?.name ?? '—'}</td>
-              <td style={{ padding: '0.5rem' }}>{p.difficulty}/10</td>
-              <td style={{ padding: '0.5rem', textTransform: 'capitalize' }}>{p.status}</td>
-              <td style={{ padding: '0.5rem' }}>
-                {p.last_played_at ? new Date(p.last_played_at).toLocaleDateString() : 'Never'}
-              </td>
-            </tr>
+            <Table.Tr key={p.id}>
+              <Table.Td>
+                <Anchor component={Link} to={`/pieces/${p.id}`} c="terracotta" fw={500}>
+                  {p.title}
+                </Anchor>
+              </Table.Td>
+              <Table.Td c="dimmed">{p.composer?.name ?? '—'}</Table.Td>
+              <Table.Td>{p.difficulty}/10</Table.Td>
+              <Table.Td>
+                <Badge color={statusColor(p.status)} variant="light" radius="sm">
+                  {p.status}
+                </Badge>
+              </Table.Td>
+              <Table.Td>{formatDate(p.last_played_at) ?? 'Never'}</Table.Td>
+            </Table.Tr>
           ))}
           {pieces.length === 0 && (
-            <tr>
-              <td colSpan={5}>
+            <Table.Tr>
+              <Table.Td colSpan={5}>
                 {!status && !composerId ? (
-                  <div style={{ padding: '3rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎹</div>
-                    <div style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '0.4rem', color: '#333' }}>No pieces yet</div>
-                    <div style={{ color: '#888', marginBottom: '1.25rem' }}>Start building your repertoire by adding your first piece.</div>
-                    <Link to="/pieces/new">
-                      <button style={{ background: '#3182ce', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, padding: '0.5rem 1.2rem', cursor: 'pointer' }}>+ Add your first piece</button>
-                    </Link>
-                  </div>
+                  <Center py={48}>
+                    <Stack align="center" gap="sm">
+                      <Text size="2.5rem" lh={1}>🎹</Text>
+                      <Text fw={600} size="lg" c="#1A1612">No pieces yet</Text>
+                      <Text c="dimmed" size="sm">Start building your repertoire by adding your first piece.</Text>
+                      <Button component={Link} to="/pieces/new" mt="xs">+ Add your first piece</Button>
+                    </Stack>
+                  </Center>
                 ) : (
-                  <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>
-                    No pieces match your filters.
-                  </div>
+                  <Text c="dimmed" ta="center" py="xl">No pieces match your filters.</Text>
                 )}
-              </td>
-            </tr>
+              </Table.Td>
+            </Table.Tr>
           )}
-        </tbody>
-      </table>
-    </div>
+        </Table.Tbody>
+      </Table>
+    </Stack>
   )
 }

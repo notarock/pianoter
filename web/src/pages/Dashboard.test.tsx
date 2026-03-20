@@ -51,7 +51,8 @@ describe('Dashboard page', () => {
   it('renders the empty-repertoire prompt when there are no pieces', async () => {
     renderWithProviders(<Dashboard />)
     expect(await screen.findByText(/your repertoire is empty/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /go to repertoire/i })).toBeInTheDocument()
+    // Mantine Button component={Link} renders as an <a> element
+    expect(screen.getByRole('link', { name: /go to repertoire/i })).toBeInTheDocument()
   })
 
   it('renders the "to revisit" section heading', async () => {
