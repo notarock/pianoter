@@ -17,7 +17,7 @@ export default function PieceForm() {
   const [composerId, setComposerId] = useState('')
   const [difficulty, setDifficulty] = useState(5)
   const [status, setStatus] = useState('wishlist')
-  const [startedAt, setStartedAt] = useState('')
+  const [startedAt, setStartedAt] = useState(() => new Date().toISOString().slice(0, 10))
 
   useEffect(() => {
     api.composers.list().then(setComposers)
