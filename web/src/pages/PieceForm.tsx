@@ -20,6 +20,7 @@ export default function PieceForm() {
   const [difficulty, setDifficulty] = useState(5)
   const [status, setStatus] = useState('wishlist')
   const [startedAt, setStartedAt] = useState<Date | null>(() => new Date())
+  const [errors, setErrors] = useState<{ title?: string; composer?: string }>({})
 
   useEffect(() => {
     api.composers.list().then(setComposers)
@@ -36,6 +37,11 @@ export default function PieceForm() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const errs: typeof errors = {}
+    if (!title.trim()) errs.title = 'Title is required'
+    if (!composerId) errs.composer = 'Please select a composer'
+    if (Object.keys(errs).length) { setErrors(errs); return }
+
     const data = {
       title,
       composer_id: Number(composerId),
@@ -70,14 +76,16 @@ export default function PieceForm() {
             label="Title"
             required
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={e => { setTitle(e.target.value); setErrors(v => ({ ...v, title: undefined })) }}
+            error={errors.title}
           />
           <NativeSelect
             label="Composer"
             required
             value={composerId}
-            onChange={e => setComposerId(e.target.value)}
+            onChange={e => { setComposerId(e.target.value); setErrors(v => ({ ...v, composer: undefined })) }}
             data={composerOptions}
+            error={errors.composer}
           />
           <div>
             <Text size="sm" fw={500} mb={6}>Difficulty — {difficulty}/10</Text>
