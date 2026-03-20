@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Title, Group, Button, Select, Table, Badge,
-  Anchor, Text, Center, Stack,
+  Anchor, Text, Center, Stack, TextInput,
 } from '@mantine/core'
 import { api } from '../api/client'
 import type { Piece, Composer } from '../api/types'
@@ -13,6 +13,7 @@ export default function Repertoire() {
   const [composers, setComposers] = useState<Composer[]>([])
   const [status, setStatus] = useState<string | null>(null)
   const [composerId, setComposerId] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     api.composers.list().then(setComposers)
@@ -40,7 +41,7 @@ export default function Repertoire() {
       </Group>
 
       {/* Filters */}
-      <Group gap="sm">
+      <Group gap="sm" wrap="wrap">
         <Select
           placeholder="All statuses"
           value={status}
@@ -63,6 +64,12 @@ export default function Repertoire() {
           data={composerOptions.slice(1)}
           w={220}
         />
+        <TextInput
+          placeholder="Search by title…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          w={200}
+        />
       </Group>
 
       {/* Table — always rendered so headers are always visible */}
@@ -77,7 +84,7 @@ export default function Repertoire() {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {pieces.map(p => (
+          {pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase())).map(p => (
             <Table.Tr key={p.id}>
               <Table.Td>
                 <Anchor component={Link} to={`/pieces/${p.id}`} c="terracotta" fw={500}>
@@ -94,10 +101,10 @@ export default function Repertoire() {
               <Table.Td>{formatDate(p.last_played_at) ?? 'Never'}</Table.Td>
             </Table.Tr>
           ))}
-          {pieces.length === 0 && (
+          {pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase())).length === 0 && (
             <Table.Tr>
               <Table.Td colSpan={5}>
-                {!status && !composerId ? (
+                {!status && !composerId && !search ? (
                   <Center py={48}>
                     <Stack align="center" gap="sm">
                       <Text size="2.5rem" lh={1}>🎹</Text>
