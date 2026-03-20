@@ -1,4 +1,4 @@
-.PHONY: dev backend frontend build db migrate-up migrate-down migrate-status test cy cy-open
+.PHONY: dev backend frontend build db migrate-up migrate-down migrate-status test test-backend test-frontend cy cy-open
 
 dev:
 	@echo "Starting backend and frontend..."
@@ -28,7 +28,12 @@ migrate-down:
 migrate-status:
 	go run . migrate status
 
-test:
+test: test-backend test-frontend
+
+test-backend:
+	go test ./...
+
+test-frontend:
 	cd web && npm test
 
 cy:
