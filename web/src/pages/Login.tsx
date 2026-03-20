@@ -71,7 +71,7 @@ export default function Login() {
 
       <Text ta="center" mt="md" size="sm" c="dimmed">
         {t('login.noAccount')}{' '}
-        <Anchor component={Link} to="/register" c="terracotta">
+        <Anchor component={Link} to="/register" c="dark">
           {t('login.registerLink')}
         </Anchor>
       </Text>

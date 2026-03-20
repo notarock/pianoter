@@ -1,20 +1,7 @@
 import { createTheme, type MantineColorsTuple } from '@mantine/core'
 
-// Terracotta scale — built around #C2410C (burnt orange)
-const terracotta: MantineColorsTuple = [
-  '#fff1ec',
-  '#ffe0d3',
-  '#fbbfa6',
-  '#f79b75',
-  '#f47c4b',
-  '#f26a30',
-  '#f26021',
-  '#d75017',
-  '#C2410C', // [8] — primary shade
-  '#9A3412', // [9] — hover / dark shade
-]
-
 // Warm gray — replaces Mantine's cool blue-tinted default gray
+// Shade 9 (#2b2520) doubles as the primary "black" accent
 const warmGray: MantineColorsTuple = [
   '#f8f6f4',
   '#ede8e4',
@@ -29,11 +16,10 @@ const warmGray: MantineColorsTuple = [
 ]
 
 export const theme = createTheme({
-  primaryColor: 'terracotta',
-  primaryShade: 8,
+  primaryColor: 'gray',
+  primaryShade: 9,
 
   colors: {
-    terracotta,
     gray: warmGray,
   },
 

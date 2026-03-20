@@ -53,15 +53,15 @@ function Nav() {
               { to: '/repertoire', label: t('nav.repertoire') },
               { to: '/composers', label: t('nav.composers') },
             ].map(({ to, label, end }) => (
-              <NavLink key={to} to={to} end={end}>
+              <NavLink key={to} to={to} end={end} style={{ textDecoration: 'none' }}>
                 {({ isActive }) => (
                   <Text
                     component="span"
                     fw={isActive ? 600 : 400}
                     style={{
-                      color: isActive ? 'var(--mantine-color-terracotta-8)' : '#6B6560',
+                      color: isActive ? 'var(--mantine-color-gray-9)' : '#6B6560',
                       borderBottom: isActive
-                        ? '2px solid var(--mantine-color-terracotta-8)'
+                        ? '2px solid var(--mantine-color-gray-9)'
                         : '2px solid transparent',
                       paddingBottom: 2,
                       fontSize: '0.9375rem',

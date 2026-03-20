@@ -75,7 +75,7 @@ export default function ComposerDetail() {
               {pieces.map(p => (
                 <Table.Tr key={p.id}>
                   <Table.Td>
-                    <Anchor component={Link} to={`/pieces/${p.id}`} c="terracotta" fw={500}>{p.title}</Anchor>
+                    <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>{p.title}</Anchor>
                   </Table.Td>
                   <Table.Td>{p.difficulty}/10</Table.Td>
                   <Table.Td>

@@ -141,7 +141,7 @@ export default function PieceForm() {
               value={difficulty}
               onChange={setDifficulty}
               marks={[1,3,5,7,10].map(v => ({ value: v, label: String(v) }))}
-              color="terracotta"
+              color="dark"
               mb="md"
             />
           </div>

@@ -99,7 +99,7 @@ export default function PieceDetail() {
               <Group gap="sm" align="center">
                 <Progress
                   value={piece.difficulty * 10}
-                  color="terracotta"
+                  color="dark"
                   size="sm"
                   w={80}
                 />

@@ -86,7 +86,7 @@ export default function Repertoire() {
           {pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase())).map(p => (
             <Table.Tr key={p.id}>
               <Table.Td>
-                <Anchor component={Link} to={`/pieces/${p.id}`} c="terracotta" fw={500}>
+                <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>
                   {p.title}
                 </Anchor>
               </Table.Td>

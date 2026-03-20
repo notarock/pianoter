@@ -82,7 +82,7 @@ export default function Register() {
 
       <Text ta="center" mt="md" size="sm" c="dimmed">
         {t('register.haveAccount')}{' '}
-        <Anchor component={Link} to="/login" c="terracotta">
+        <Anchor component={Link} to="/login" c="dark">
           {t('register.signInLink')}
         </Anchor>
       </Text>

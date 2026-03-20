@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Piano keys on terracotta background -->
-  <rect width="32" height="32" rx="6" fill="#C2410C"/>
+  <!-- Piano keys on dark background -->
+  <rect width="32" height="32" rx="6" fill="#2b2520"/>
   <!-- White keys -->
   <rect x="3" y="8" width="4" height="16" rx="1" fill="white"/>
   <rect x="8" y="8" width="4" height="16" rx="1" fill="white"/>
