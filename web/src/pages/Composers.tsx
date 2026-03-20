@@ -100,7 +100,7 @@ export default function Composers() {
       )}
 
       <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
-        <Table.Thead style={{ background: '#f9f7f4' }}>
+        <Table.Thead style={{ background: '#f5f5f5' }}>
           <Table.Tr>
             <Table.Th>{t('composers.colName')}</Table.Th>
             <Table.Th>{t('composers.colNationality')}</Table.Th>
@@ -117,7 +117,7 @@ export default function Composers() {
                   {c.name}
                   {c.user_id === 0 && (
                     <Tooltip label={t('composers.systemTooltip')} withArrow>
-                      <Badge size="xs" color="blue" variant="light">{t('composers.systemBadge')}</Badge>
+                      <Badge size="xs" color="gray" variant="light">{t('composers.systemBadge')}</Badge>
                     </Tooltip>
                   )}
                 </Group>

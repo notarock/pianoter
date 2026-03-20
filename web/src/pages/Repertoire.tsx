@@ -73,7 +73,7 @@ export default function Repertoire() {
 
       {/* Table — always rendered so headers are always visible */}
       <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
-        <Table.Thead style={{ background: '#f9f7f4' }}>
+        <Table.Thead style={{ background: '#f5f5f5' }}>
           <Table.Tr>
             <Table.Th>{t('repertoire.colTitle')}</Table.Th>
             <Table.Th>{t('repertoire.colComposer')}</Table.Th>

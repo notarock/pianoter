@@ -14,12 +14,27 @@ const terracotta: MantineColorsTuple = [
   '#9A3412', // [9] — hover / dark shade
 ]
 
+// Warm gray — replaces Mantine's cool blue-tinted default gray
+const warmGray: MantineColorsTuple = [
+  '#f8f6f4',
+  '#ede8e4',
+  '#dcd5cf',
+  '#c4bbb4',
+  '#a89f98',
+  '#8c837b',
+  '#736b63',
+  '#5a5249',
+  '#423c35',
+  '#2b2520',
+]
+
 export const theme = createTheme({
   primaryColor: 'terracotta',
   primaryShade: 8,
 
   colors: {
     terracotta,
+    gray: warmGray,
   },
 
   fontFamily: 'Inter, sans-serif',
@@ -32,7 +47,6 @@ export const theme = createTheme({
   fontSmoothing: true,
 
   components: {
-    // Give Paper a warm background by default
     Paper: {
       defaultProps: {
         bg: 'var(--app-bg-surface)',

@@ -24,7 +24,7 @@ function Nav() {
   return (
     <AppShell.Header
       style={{
-        background: '#fff',
+        background: 'var(--app-bg-surface)',
         borderBottom: '1px solid var(--app-border)',
       }}
     >

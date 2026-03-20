@@ -104,7 +104,7 @@ export default function Dashboard() {
           <Text c="dimmed" size="sm">{t('dashboard.allCaughtUp')}</Text>
         ) : (
           <Table striped highlightOnHover withTableBorder withColumnBorders={false} verticalSpacing="sm">
-            <Table.Thead style={{ background: '#f9f7f4' }}>
+            <Table.Thead style={{ background: '#f5f5f5' }}>
               <Table.Tr>
                 <Table.Th>{t('dashboard.colTitle')}</Table.Th>
                 <Table.Th>{t('dashboard.colComposer')}</Table.Th>

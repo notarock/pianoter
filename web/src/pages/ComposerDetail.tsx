@@ -36,7 +36,7 @@ export default function ComposerDetail() {
       <Group align="flex-end" gap="sm">
         <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{composer.name}</Title>
         {composer.user_id === 0 && (
-          <Badge size="sm" color="blue" variant="light" mb={4}>{t('composers.systemBadge')}</Badge>
+          <Badge size="sm" color="gray" variant="light" mb={4}>{t('composers.systemBadge')}</Badge>
         )}
       </Group>
 
@@ -63,7 +63,7 @@ export default function ComposerDetail() {
         <Box>
           <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>{t('composerDetail.piecesTitle')}</Title>
           <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
-            <Table.Thead style={{ background: '#f9f7f4' }}>
+            <Table.Thead style={{ background: '#f5f5f5' }}>
               <Table.Tr>
                 <Table.Th>{t('composerDetail.colTitle')}</Table.Th>
                 <Table.Th>{t('composerDetail.colDifficulty')}</Table.Th>

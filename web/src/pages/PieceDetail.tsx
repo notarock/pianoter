@@ -222,7 +222,7 @@ export default function PieceDetail() {
                 <Timeline.Item key={s.id} title={new Date(s.played_at).toLocaleString()}>
                   {s.playing_level && (
                     <Group gap="xs" mt={4}>
-                      <Badge variant="light" color="blue" size="sm">
+                      <Badge variant="light" color="gray" size="sm">
                         {levelLabel(s.playing_level as PlayingLevel)}
                       </Badge>
                       {levelChanged && (
