@@ -119,7 +119,11 @@ export default function Dashboard() {
                       {p.title}
                     </Anchor>
                   </Table.Td>
-                  <Table.Td c="dimmed">{p.composer?.name ?? '—'}</Table.Td>
+                  <Table.Td c="dimmed">
+                    {p.composer
+                      ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
+                      : '—'}
+                  </Table.Td>
                   <Table.Td>{formatDate(p.last_played_at) ?? 'Never'}</Table.Td>
                   <Table.Td>
                     <Badge color={statusColor(p.status)} variant="light" radius="sm">

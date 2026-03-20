@@ -91,7 +91,11 @@ export default function Repertoire() {
                   {p.title}
                 </Anchor>
               </Table.Td>
-              <Table.Td c="dimmed">{p.composer?.name ?? '—'}</Table.Td>
+              <Table.Td c="dimmed">
+                {p.composer
+                  ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
+                  : '—'}
+              </Table.Td>
               <Table.Td>{p.difficulty}/10</Table.Td>
               <Table.Td>
                 <Badge color={statusColor(p.status)} variant="light" radius="sm">
