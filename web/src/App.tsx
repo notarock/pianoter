@@ -5,6 +5,7 @@ import Repertoire from './pages/Repertoire'
 import PieceDetail from './pages/PieceDetail'
 import PieceForm from './pages/PieceForm'
 import Composers from './pages/Composers'
+import ComposerDetail from './pages/ComposerDetail'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -111,6 +112,7 @@ export default function App() {
                 <Route path="/pieces/:id" element={<ProtectedRoute><PieceDetail /></ProtectedRoute>} />
                 <Route path="/pieces/:id/edit" element={<ProtectedRoute><PieceForm /></ProtectedRoute>} />
                 <Route path="/composers" element={<ProtectedRoute><Composers /></ProtectedRoute>} />
+                <Route path="/composers/:id" element={<ProtectedRoute><ComposerDetail /></ProtectedRoute>} />
               </Routes>
             </Box>
           </AppShell.Main>
