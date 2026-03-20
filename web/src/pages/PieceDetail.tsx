@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   Title, Group, Button, Badge, Stack, Table,
-  Text, Textarea, NativeSelect, Box, Timeline,
+  Text, Textarea, NativeSelect, Box, Timeline, Breadcrumbs, Anchor,
 } from '@mantine/core'
 import { api } from '../api/client'
 import { PLAYING_LEVELS } from '../api/types'
@@ -66,6 +66,11 @@ export default function PieceDetail() {
 
   return (
     <Stack gap="lg">
+      <Breadcrumbs fz="sm" c="dimmed">
+        <Anchor component={Link} to="/repertoire" c="dimmed" fz="sm">Repertoire</Anchor>
+        <Text span fz="sm" c="#1A1612">{piece.title}</Text>
+      </Breadcrumbs>
+
       <Group justify="space-between" align="center">
         <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{piece.title}</Title>
         <Group gap="sm">
