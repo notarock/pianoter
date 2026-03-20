@@ -5,6 +5,7 @@ import {
   Button, Group, Paper, Slider, Text,
 } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
+import { DatePickerInput } from '@mantine/dates'
 import { api } from '../api/client'
 import type { Composer, Piece } from '../api/types'
 
@@ -18,7 +19,7 @@ export default function PieceForm() {
   const [composerId, setComposerId] = useState('')
   const [difficulty, setDifficulty] = useState(5)
   const [status, setStatus] = useState('wishlist')
-  const [startedAt, setStartedAt] = useState(() => new Date().toISOString().slice(0, 10))
+  const [startedAt, setStartedAt] = useState<Date | null>(() => new Date())
 
   useEffect(() => {
     api.composers.list().then(setComposers)
@@ -28,7 +29,7 @@ export default function PieceForm() {
         setComposerId(String(p.composer_id))
         setDifficulty(p.difficulty ?? 5)
         setStatus(p.status)
-        setStartedAt(p.started_at ? p.started_at.slice(0, 10) : '')
+        setStartedAt(p.started_at ? new Date(p.started_at) : null)
       })
     }
   }, [id])
@@ -40,7 +41,7 @@ export default function PieceForm() {
       composer_id: Number(composerId),
       difficulty,
       status: status as Piece['status'],
-      started_at: startedAt ? new Date(startedAt).toISOString() : null,
+      started_at: startedAt ? startedAt.toISOString() : null,
     }
     if (isEdit) {
       await api.pieces.update(Number(id), data)
@@ -102,11 +103,13 @@ export default function PieceForm() {
               { value: 'shelved',  label: 'Shelved'  },
             ]}
           />
-          <TextInput
+          <DatePickerInput
             label="Started At"
-            type="date"
+            placeholder="Pick a date"
             value={startedAt}
-            onChange={e => setStartedAt(e.target.value)}
+            onChange={setStartedAt}
+            clearable
+            valueFormat="MMM D, YYYY"
           />
           <Group mt="xs">
             <Button type="submit" flex={1}>
