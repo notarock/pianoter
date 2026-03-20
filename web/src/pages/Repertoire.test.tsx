@@ -76,8 +76,7 @@ describe('Repertoire page', () => {
   it('renders empty state when no pieces exist', async () => {
     renderWithProviders(<Repertoire />)
     expect(await screen.findByText(/no pieces yet/i)).toBeInTheDocument()
-    // Mantine Button component={Link} renders as an <a> element
-    expect(screen.getByRole('link', { name: /add your first piece/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /\+ add piece/i })).toBeInTheDocument()
   })
 
   it('renders a row for each piece with a link to its detail page', async () => {

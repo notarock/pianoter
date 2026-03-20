@@ -102,8 +102,7 @@ export default function Repertoire() {
                     <Stack align="center" gap="sm">
                       <Text size="2.5rem" lh={1}>🎹</Text>
                       <Text fw={600} size="lg" c="#1A1612">No pieces yet</Text>
-                      <Text c="dimmed" size="sm">Start building your repertoire by adding your first piece.</Text>
-                      <Button component={Link} to="/pieces/new" mt="xs">+ Add your first piece</Button>
+                      <Text c="dimmed" size="sm">Use the <strong>+ Add Piece</strong> button above to get started.</Text>
                     </Stack>
                   </Center>
                 ) : (
