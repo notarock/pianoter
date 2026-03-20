@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import {
+  Title, Group, Button, Badge, Stack, Table,
+  Text, Textarea, NativeSelect, Box, Timeline,
+} from '@mantine/core'
 import { api } from '../api/client'
 import { PLAYING_LEVELS } from '../api/types'
 import type { Piece, PlaySession, PlayingLevel } from '../api/types'
+import { statusColor, formatDate } from '../utils'
 
 function levelLabel(key: PlayingLevel | ''): string {
   if (!key) return '—'
@@ -47,12 +52,11 @@ export default function PieceDetail() {
     navigate('/repertoire')
   }
 
-  if (!piece) return <p>Loading...</p>
+  if (!piece) return <Text>Loading...</Text>
 
   // Sessions ordered oldest→newest for progression analysis
   const chronological = [...sessions].reverse()
 
-  // Progression summary: collect first date seen for each level and days spent
   const levelChanges: { level: PlayingLevel; date: string }[] = []
   for (const s of chronological) {
     if (s.playing_level && (levelChanges.length === 0 || levelChanges[levelChanges.length - 1].level !== s.playing_level)) {
@@ -61,127 +65,148 @@ export default function PieceDetail() {
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>{piece.title}</h1>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Link to={`/pieces/${id}/edit`}><button>Edit</button></Link>
-          <button onClick={deletePiece} style={{ background: '#e53e3e', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: 4, cursor: 'pointer' }}>Delete</button>
-        </div>
-      </div>
+    <Stack gap="lg">
+      <Group justify="space-between" align="center">
+        <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{piece.title}</Title>
+        <Group gap="sm">
+          <Button component={Link} to={`/pieces/${id}/edit`} variant="default">Edit</Button>
+          <Button onClick={deletePiece} color="red" variant="light">Delete</Button>
+        </Group>
+      </Group>
 
-      <table style={{ borderCollapse: 'collapse', marginBottom: '1rem' }}>
-        <tbody>
-          <tr><td style={{ padding: '0.25rem 1rem 0.25rem 0', color: '#666' }}>Composer</td><td>{piece.composer?.name ?? '—'}</td></tr>
-          <tr><td style={{ padding: '0.25rem 1rem 0.25rem 0', color: '#666' }}>Difficulty</td><td>{piece.difficulty}/10</td></tr>
-          <tr><td style={{ padding: '0.25rem 1rem 0.25rem 0', color: '#666' }}>Status</td><td style={{ textTransform: 'capitalize' }}>{piece.status}</td></tr>
-          <tr><td style={{ padding: '0.25rem 1rem 0.25rem 0', color: '#666' }}>Started</td><td>{piece.started_at ? new Date(piece.started_at).toLocaleDateString() : '—'}</td></tr>
-          <tr><td style={{ padding: '0.25rem 1rem 0.25rem 0', color: '#666' }}>Last Played</td><td>{piece.last_played_at ? new Date(piece.last_played_at).toLocaleDateString() : 'Never'}</td></tr>
-          <tr><td style={{ padding: '0.25rem 1rem 0.25rem 0', color: '#666' }}>Current Level</td><td>{levelLabel(piece.current_level)}</td></tr>
-        </tbody>
-      </table>
+      {/* Metadata */}
+      <Table w="auto" withRowBorders={false} verticalSpacing={4}>
+        <Table.Tbody>
+          <Table.Tr>
+            <Table.Td c="dimmed" pr="xl">Composer</Table.Td>
+            <Table.Td>{piece.composer?.name ?? '—'}</Table.Td>
+          </Table.Tr>
+          <Table.Tr>
+            <Table.Td c="dimmed" pr="xl">Difficulty</Table.Td>
+            <Table.Td>{piece.difficulty}/10</Table.Td>
+          </Table.Tr>
+          <Table.Tr>
+            <Table.Td c="dimmed" pr="xl">Status</Table.Td>
+            <Table.Td>
+              <Badge color={statusColor(piece.status)} variant="light" radius="sm">
+                {piece.status}
+              </Badge>
+            </Table.Td>
+          </Table.Tr>
+          <Table.Tr>
+            <Table.Td c="dimmed" pr="xl">Started</Table.Td>
+            <Table.Td>{formatDate(piece.started_at) ?? '—'}</Table.Td>
+          </Table.Tr>
+          <Table.Tr>
+            <Table.Td c="dimmed" pr="xl">Last Played</Table.Td>
+            <Table.Td>{formatDate(piece.last_played_at) ?? 'Never'}</Table.Td>
+          </Table.Tr>
+          <Table.Tr>
+            <Table.Td c="dimmed" pr="xl">Current Level</Table.Td>
+            <Table.Td>{levelLabel(piece.current_level)}</Table.Td>
+          </Table.Tr>
+        </Table.Tbody>
+      </Table>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <button onClick={() => setLogging(v => !v)}>
+      {/* Log session */}
+      <Box>
+        <Button
+          variant={logging ? 'default' : 'filled'}
+          onClick={() => setLogging(v => !v)}
+        >
           {logging ? 'Cancel' : '+ Log Practice Session'}
-        </button>
+        </Button>
         {logging && (
-          <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input
-                style={{ flex: 1, padding: '0.5rem', border: '1px solid #ccc', borderRadius: 4 }}
+          <Stack gap="sm" mt="sm">
+            <Group align="flex-end">
+              <Textarea
                 placeholder="Notes (optional)"
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
+                autosize
+                minRows={1}
+                style={{ flex: 1 }}
               />
-              <button onClick={logSession}>Save</button>
-            </div>
-            <div>
-              <select
+              <Button onClick={logSession}>Save</Button>
+            </Group>
+            <Box>
+              <NativeSelect
                 value={playingLevel}
                 onChange={e => setPlayingLevel(e.target.value as PlayingLevel | '')}
-                style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: 4 }}
-              >
-                <option value="">— No level recorded —</option>
-                {PLAYING_LEVELS.map(l => (
-                  <option key={l.key} value={l.key} title={l.description}>{l.label}</option>
-                ))}
-              </select>
+                data={[
+                  { value: '', label: '— No level recorded —' },
+                  ...PLAYING_LEVELS.map(l => ({ value: l.key, label: l.label })),
+                ]}
+              />
               {playingLevel && (
-                <div style={{ marginTop: '0.25rem', fontSize: '0.85rem', color: '#666' }}>
-                  {levelDescription(playingLevel)}
-                </div>
+                <Text size="sm" c="dimmed" mt={4}>{levelDescription(playingLevel)}</Text>
               )}
-            </div>
-          </div>
+            </Box>
+          </Stack>
         )}
-      </div>
+      </Box>
 
+      {/* Level progression */}
       {levelChanges.length > 1 && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <h2>Level Progression</h2>
-          <table style={{ borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-            <thead>
-              <tr>
-                <th style={{ padding: '0.25rem 1rem 0.25rem 0', textAlign: 'left', color: '#666' }}>Level</th>
-                <th style={{ padding: '0.25rem 1rem 0.25rem 0', textAlign: 'left', color: '#666' }}>Reached</th>
-                <th style={{ padding: '0.25rem 1rem 0.25rem 0', textAlign: 'left', color: '#666' }}>Days spent</th>
-              </tr>
-            </thead>
-            <tbody>
+        <Box>
+          <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>Level Progression</Title>
+          <Table striped withTableBorder verticalSpacing="xs" fz="sm">
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Level</Table.Th>
+                <Table.Th>Reached</Table.Th>
+                <Table.Th>Days spent</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
               {levelChanges.map((lc, i) => {
                 const start = new Date(lc.date)
                 const end = i + 1 < levelChanges.length ? new Date(levelChanges[i + 1].date) : new Date()
                 const days = Math.round((end.getTime() - start.getTime()) / 86400000)
                 return (
-                  <tr key={lc.level}>
-                    <td style={{ padding: '0.25rem 1rem 0.25rem 0' }}>{levelLabel(lc.level)}</td>
-                    <td style={{ padding: '0.25rem 1rem 0.25rem 0' }}>{start.toLocaleDateString()}</td>
-                    <td style={{ padding: '0.25rem 1rem 0.25rem 0' }}>{i + 1 < levelChanges.length ? `${days}d` : `${days}d (ongoing)`}</td>
-                  </tr>
+                  <Table.Tr key={lc.level}>
+                    <Table.Td>{levelLabel(lc.level)}</Table.Td>
+                    <Table.Td>{start.toLocaleDateString()}</Table.Td>
+                    <Table.Td>{i + 1 < levelChanges.length ? `${days}d` : `${days}d (ongoing)`}</Table.Td>
+                  </Table.Tr>
                 )
               })}
-            </tbody>
-          </table>
-        </div>
+            </Table.Tbody>
+          </Table>
+        </Box>
       )}
 
-      <h2>Practice History</h2>
-      {sessions.length === 0 ? (
-        <p style={{ color: '#888' }}>No sessions logged yet.</p>
-      ) : (
-        <div style={{ borderLeft: '2px solid #e2e8f0', paddingLeft: '1rem' }}>
-          {sessions.map((s, i) => {
-            const prevLevel = sessions[i + 1]?.playing_level ?? ''
-            const levelChanged = s.playing_level && s.playing_level !== prevLevel
-            return (
-              <div key={s.id} style={{ marginBottom: '1rem' }}>
-                <div style={{ fontWeight: 'bold' }}>{new Date(s.played_at).toLocaleString()}</div>
-                {s.playing_level && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
-                    <span style={{
-                      fontSize: '0.8rem',
-                      padding: '0.1rem 0.5rem',
-                      borderRadius: 12,
-                      background: '#ebf8ff',
-                      color: '#2b6cb0',
-                      border: '1px solid #bee3f8',
-                    }}>
-                      {levelLabel(s.playing_level as PlayingLevel)}
-                    </span>
-                    {levelChanged && (
-                      <span style={{ fontSize: '0.8rem', color: '#38a169', fontWeight: 'bold' }}>
-                        ↑ {levelLabel(s.playing_level as PlayingLevel)}
-                      </span>
-                    )}
-                  </div>
-                )}
-                {s.notes && <div style={{ color: '#666', marginTop: '0.2rem' }}>{s.notes}</div>}
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
+      {/* Practice history */}
+      <Box>
+        <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>Practice History</Title>
+        {sessions.length === 0 ? (
+          <Text c="dimmed">No sessions logged yet.</Text>
+        ) : (
+          <Timeline active={sessions.length} bulletSize={12} lineWidth={2}>
+            {sessions.map((s, i) => {
+              const prevLevel = sessions[i + 1]?.playing_level ?? ''
+              const levelChanged = s.playing_level && s.playing_level !== prevLevel
+              return (
+                <Timeline.Item key={s.id} title={new Date(s.played_at).toLocaleString()}>
+                  {s.playing_level && (
+                    <Group gap="xs" mt={4}>
+                      <Badge variant="light" color="blue" size="sm">
+                        {levelLabel(s.playing_level as PlayingLevel)}
+                      </Badge>
+                      {levelChanged && (
+                        <Text size="sm" c="green" fw={600}>
+                          ↑ {levelLabel(s.playing_level as PlayingLevel)}
+                        </Text>
+                      )}
+                    </Group>
+                  )}
+                  {s.notes && <Text size="sm" c="dimmed" mt={4}>{s.notes}</Text>}
+                </Timeline.Item>
+              )
+            })}
+          </Timeline>
+        )}
+      </Box>
+    </Stack>
   )
 }

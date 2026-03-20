@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react'
+import {
+  Title, Group, Button, Table, Badge, Text,
+  Checkbox, TextInput, NativeSelect, Stack, Center,
+} from '@mantine/core'
 import { api } from '../api/client'
 import type { Composer } from '../api/types'
 import { COMPOSER_NATIONALITIES } from '../api/types'
@@ -32,81 +36,114 @@ export default function Composers() {
     load()
   }
 
+  const visible = composers.filter(c => !hideSystem || c.user_id !== 0)
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Composers</h1>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <label style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}>
-            <input type="checkbox" checked={hideSystem} onChange={e => setHideSystem(e.target.checked)} />
-            Hide system composers
-          </label>
-          <button onClick={() => setShowForm(v => !v)} style={showForm ? { cursor: 'pointer', padding: '0.4rem 0.9rem' } : { background: '#3182ce', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, padding: '0.4rem 0.9rem', cursor: 'pointer' }}>
+    <Stack gap="lg">
+      <Group justify="space-between" align="center">
+        <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>Composers</Title>
+        <Group gap="md" align="center">
+          <Checkbox
+            label="Hide system composers"
+            checked={hideSystem}
+            onChange={e => setHideSystem(e.currentTarget.checked)}
+          />
+          <Button
+            variant={showForm ? 'default' : 'filled'}
+            onClick={() => setShowForm(v => !v)}
+          >
             {showForm ? 'Cancel' : '+ Add Composer'}
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Group>
+      </Group>
 
       {showForm && (
-        <form onSubmit={submit} style={{ display: 'flex', gap: '0.5rem', margin: '1rem 0', flexWrap: 'wrap' }}>
-          <input required placeholder="Name" value={name} onChange={e => setName(e.target.value)} style={{ padding: '0.5rem', flex: 2 }} />
-          <select value={nationality} onChange={e => setNationality(e.target.value)} style={{ padding: '0.5rem', minWidth: 160 }}>
-            <option value="">Nationality</option>
-            {COMPOSER_NATIONALITIES.map(n => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-          <input placeholder="Born year" type="number" value={bornYear} onChange={e => setBornYear(e.target.value)} style={{ padding: '0.5rem', width: 120 }} />
-          <input placeholder="Died year" type="number" value={diedYear} onChange={e => setDiedYear(e.target.value)} style={{ padding: '0.5rem', width: 120 }} />
-          <button type="submit">Add</button>
+        <form onSubmit={submit}>
+          <Group gap="sm" wrap="wrap" align="flex-end">
+            <TextInput
+              required
+              placeholder="Name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              style={{ flex: 2, minWidth: 160 }}
+            />
+            <NativeSelect
+              value={nationality}
+              onChange={e => setNationality(e.target.value)}
+              data={[
+                { value: '', label: 'Nationality' },
+                ...COMPOSER_NATIONALITIES.map(n => ({ value: n, label: n })),
+              ]}
+              style={{ minWidth: 160 }}
+            />
+            <TextInput
+              placeholder="Born year"
+              type="number"
+              value={bornYear}
+              onChange={e => setBornYear(e.target.value)}
+              w={120}
+            />
+            <TextInput
+              placeholder="Died year"
+              type="number"
+              value={diedYear}
+              onChange={e => setDiedYear(e.target.value)}
+              w={120}
+            />
+            <Button type="submit">Add</Button>
+          </Group>
         </form>
       )}
 
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ background: '#f5f5f5' }}>
-            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Name</th>
-            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Nationality</th>
-            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Born</th>
-            <th style={{ textAlign: 'left', padding: '0.5rem' }}>Died</th>
-            <th style={{ padding: '0.5rem' }}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {composers.filter(c => !hideSystem || c.user_id !== 0).map(c => (
-            <tr key={c.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: '0.5rem' }}>
-                {c.name}
-                {c.user_id === 0 && (
-                  <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '0.1rem 0.4rem', background: '#e8f0fe', color: '#1a73e8', borderRadius: 4, verticalAlign: 'middle' }}>
-                    system
-                  </span>
-                )}
-              </td>
-              <td style={{ padding: '0.5rem' }}>{c.nationality || '—'}</td>
-              <td style={{ padding: '0.5rem' }}>{c.born_year ?? '—'}</td>
-              <td style={{ padding: '0.5rem' }}>{c.died_year ?? '—'}</td>
-              <td style={{ padding: '0.5rem', textAlign: 'right' }}>
+      <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
+        <Table.Thead style={{ background: '#f9f7f4' }}>
+          <Table.Tr>
+            <Table.Th>Name</Table.Th>
+            <Table.Th>Nationality</Table.Th>
+            <Table.Th>Born</Table.Th>
+            <Table.Th>Died</Table.Th>
+            <Table.Th />
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {visible.map(c => (
+            <Table.Tr key={c.id}>
+              <Table.Td>
+                <Group gap="xs">
+                  {c.name}
+                  {c.user_id === 0 && (
+                    <Badge size="xs" color="blue" variant="light">system</Badge>
+                  )}
+                </Group>
+              </Table.Td>
+              <Table.Td c="dimmed">{c.nationality || '—'}</Table.Td>
+              <Table.Td c="dimmed">{c.born_year ?? '—'}</Table.Td>
+              <Table.Td c="dimmed">{c.died_year ?? '—'}</Table.Td>
+              <Table.Td ta="right">
                 {c.user_id !== 0 && (
-                  <button
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    color="red"
                     onClick={async () => { await api.composers.delete(c.id); load() }}
-                    style={{ padding: '0.2rem 0.5rem', background: 'none', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer', color: '#c00' }}
                   >
                     Delete
-                  </button>
+                  </Button>
                 )}
-              </td>
-            </tr>
+              </Table.Td>
+            </Table.Tr>
           ))}
-          {composers.length === 0 && (
-            <tr>
-              <td colSpan={5} style={{ padding: '1rem', textAlign: 'center', color: '#888' }}>
-                No composers yet.
-              </td>
-            </tr>
+          {visible.length === 0 && (
+            <Table.Tr>
+              <Table.Td colSpan={5}>
+                <Center py="xl">
+                  <Text c="dimmed">No composers yet.</Text>
+                </Center>
+              </Table.Td>
+            </Table.Tr>
           )}
-        </tbody>
-      </table>
-    </div>
+        </Table.Tbody>
+      </Table>
+    </Stack>
   )
 }
