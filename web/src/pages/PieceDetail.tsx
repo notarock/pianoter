@@ -123,6 +123,12 @@ export default function PieceDetail() {
             <Table.Td c="dimmed" pr="xl">Current Level</Table.Td>
             <Table.Td>{levelLabel(piece.current_level)}</Table.Td>
           </Table.Tr>
+          {piece.notes && (
+            <Table.Tr>
+              <Table.Td c="dimmed" pr="xl" style={{ verticalAlign: 'top' }}>Notes</Table.Td>
+              <Table.Td style={{ whiteSpace: 'pre-wrap' }}>{piece.notes}</Table.Td>
+            </Table.Tr>
+          )}
         </Table.Tbody>
       </Table>
 

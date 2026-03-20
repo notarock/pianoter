@@ -29,6 +29,7 @@ type Piece struct {
 	StartedAt    *time.Time `json:"started_at"`
 	LastPlayedAt *time.Time `json:"last_played_at"`
 	CurrentLevel string     `json:"current_level"` // denormalized from latest session with a level
+	Notes        string     `json:"notes"`
 }
 
 type PlaySession struct {

@@ -44,6 +44,7 @@ export interface Piece {
   started_at: string | null
   last_played_at: string | null
   current_level: PlayingLevel | ''
+  notes: string
 }
 
 export interface PlaySession {

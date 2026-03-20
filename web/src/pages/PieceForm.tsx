@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  Title, Stack, TextInput, NativeSelect,
+  Title, Stack, TextInput, NativeSelect, Textarea,
   Button, Group, Paper, Slider, Text,
 } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
@@ -20,6 +20,7 @@ export default function PieceForm() {
   const [difficulty, setDifficulty] = useState(5)
   const [status, setStatus] = useState('wishlist')
   const [startedAt, setStartedAt] = useState<Date | null>(() => new Date())
+  const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<{ title?: string; composer?: string }>({})
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function PieceForm() {
         setDifficulty(p.difficulty ?? 5)
         setStatus(p.status)
         setStartedAt(p.started_at ? new Date(p.started_at) : null)
+        setNotes(p.notes ?? '')
       })
     }
   }, [id])
@@ -48,6 +50,7 @@ export default function PieceForm() {
       difficulty,
       status: status as Piece['status'],
       started_at: startedAt ? startedAt.toISOString() : null,
+      notes,
     }
     if (isEdit) {
       await api.pieces.update(Number(id), data)
@@ -110,6 +113,14 @@ export default function PieceForm() {
               { value: 'active',   label: 'Active'   },
               { value: 'shelved',  label: 'Shelved'  },
             ]}
+          />
+          <Textarea
+            label="Notes"
+            placeholder="e.g. currently working on bars 24–48, focus on left hand"
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            autosize
+            minRows={2}
           />
           <DatePickerInput
             label="Started At"

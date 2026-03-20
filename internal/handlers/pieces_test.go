@@ -270,6 +270,47 @@ func TestPieceDelete_OwnPiece(t *testing.T) {
 	}
 }
 
+func TestPieceCreate_SavesNotes(t *testing.T) {
+	_, r := setupPieceRouter(t, 1)
+
+	body := `{"title":"Für Elise","status":"learning","difficulty":4,"notes":"Focus on bars 24–48"}`
+	req := httptest.NewRequest(http.MethodPost, "/pieces", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d: %s", rr.Code, rr.Body.String())
+	}
+	var p map[string]any
+	json.NewDecoder(rr.Body).Decode(&p)
+	if p["notes"] != "Focus on bars 24–48" {
+		t.Errorf("expected notes to be saved, got %v", p["notes"])
+	}
+}
+
+func TestPieceUpdate_SavesNotes(t *testing.T) {
+	h, r := setupPieceRouter(t, 1)
+
+	piece := models.Piece{UserID: 1, Title: "Waldstein", Status: "active"}
+	h.DB.Create(&piece)
+
+	body := `{"title":"Waldstein","status":"active","notes":"Currently polishing the coda"}`
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/pieces/%d", piece.ID), bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+	var p map[string]any
+	json.NewDecoder(rr.Body).Decode(&p)
+	if p["notes"] != "Currently polishing the coda" {
+		t.Errorf("expected notes to be updated, got %v", p["notes"])
+	}
+}
+
 func TestPieceDelete_404ForAnotherUsersPiece(t *testing.T) {
 	h, r := setupPieceRouter(t, 1)
 

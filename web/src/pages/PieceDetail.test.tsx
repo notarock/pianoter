@@ -24,6 +24,7 @@ const piece: Piece = {
   started_at: '2026-01-01T00:00:00Z',
   last_played_at: null,
   current_level: '',
+  notes: '',
 }
 
 const ROUTE = '/pieces/:id'
