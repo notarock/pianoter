@@ -4,6 +4,7 @@ import {
   Title, Stack, TextInput, NativeSelect,
   Button, Group, Paper, Slider, Text,
 } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import { api } from '../api/client'
 import type { Composer, Piece } from '../api/types'
 
@@ -43,9 +44,11 @@ export default function PieceForm() {
     }
     if (isEdit) {
       await api.pieces.update(Number(id), data)
+      notifications.show({ message: 'Piece updated', color: 'teal' })
       navigate(`/pieces/${id}`)
     } else {
       const p = await api.pieces.create(data)
+      notifications.show({ message: 'Piece added to repertoire', color: 'teal' })
       navigate(`/pieces/${p.id}`)
     }
   }

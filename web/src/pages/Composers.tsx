@@ -3,6 +3,7 @@ import {
   Title, Group, Button, Table, Badge, Text,
   Checkbox, TextInput, NativeSelect, Stack, Center,
 } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import { api } from '../api/client'
 import type { Composer } from '../api/types'
 import { COMPOSER_NATIONALITIES } from '../api/types'
@@ -33,6 +34,7 @@ export default function Composers() {
     setBornYear('')
     setDiedYear('')
     setShowForm(false)
+    notifications.show({ message: 'Composer added', color: 'teal' })
     load()
   }
 

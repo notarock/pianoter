@@ -8,6 +8,7 @@ import { api } from '../api/client'
 import { PLAYING_LEVELS } from '../api/types'
 import type { Piece, PlaySession, PlayingLevel } from '../api/types'
 import { statusColor, formatDate } from '../utils'
+import { notifications } from '@mantine/notifications'
 
 function levelLabel(key: PlayingLevel | ''): string {
   if (!key) return '—'
@@ -40,6 +41,7 @@ export default function PieceDetail() {
     const data: { notes?: string; playing_level?: PlayingLevel } = { notes }
     if (playingLevel) data.playing_level = playingLevel
     await api.sessions.create(Number(id), data)
+    notifications.show({ message: 'Practice session logged', color: 'teal' })
     setNotes('')
     setPlayingLevel('')
     setLogging(false)
