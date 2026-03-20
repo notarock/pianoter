@@ -137,6 +137,9 @@ func TestPieceList_StaleDaysFilter(t *testing.T) {
 	// piece never played — should NOT appear in stale results
 	h.DB.Create(&models.Piece{UserID: 1, Title: "Never Played", Status: "active"})
 
+	// wishlist piece played long ago — should NOT appear (wishlist = not yet started)
+	h.DB.Create(&models.Piece{UserID: 1, Title: "Wishlist Piece", Status: "wishlist", LastPlayedAt: &oldDate})
+
 	req := httptest.NewRequest(http.MethodGet, "/pieces?stale_days=7", nil)
 	rr := httptest.NewRecorder()
 	r.ServeHTTP(rr, req)
@@ -145,7 +148,7 @@ func TestPieceList_StaleDaysFilter(t *testing.T) {
 	if err := json.NewDecoder(rr.Body).Decode(&pieces); err != nil {
 		t.Fatalf("failed to decode: %v", err)
 	}
-	// Should return only stalePiece; fresh and never-played are excluded
+	// Should return only stalePiece; fresh, never-played, and wishlist are excluded
 	if len(pieces) != 1 {
 		t.Errorf("expected 1 stale piece, got %d", len(pieces))
 	}
