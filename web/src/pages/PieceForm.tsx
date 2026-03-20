@@ -7,6 +7,7 @@ import {
 import { useDisclosure } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import { DatePickerInput } from '@mantine/dates'
+import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Composer, Piece } from '../api/types'
 import { COMPOSER_NATIONALITIES } from '../api/types'
@@ -15,6 +16,7 @@ export default function PieceForm() {
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [composers, setComposers] = useState<Composer[]>([])
   const [title, setTitle] = useState('')
@@ -49,8 +51,8 @@ export default function PieceForm() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs: typeof errors = {}
-    if (!title.trim()) errs.title = 'Title is required'
-    if (!composerId) errs.composer = 'Please select a composer'
+    if (!title.trim()) errs.title = t('pieceForm.errorTitle')
+    if (!composerId) errs.composer = t('pieceForm.errorComposer')
     if (Object.keys(errs).length) { setErrors(errs); return }
 
     const data = {
@@ -63,11 +65,11 @@ export default function PieceForm() {
     }
     if (isEdit) {
       await api.pieces.update(Number(id), data)
-      notifications.show({ message: 'Piece updated', color: 'teal' })
+      notifications.show({ message: t('pieceForm.notifUpdated'), color: 'teal' })
       navigate(`/pieces/${id}`)
     } else {
       const p = await api.pieces.create(data)
-      notifications.show({ message: 'Piece added to repertoire', color: 'teal' })
+      notifications.show({ message: t('pieceForm.notifAdded'), color: 'teal' })
       navigate(`/pieces/${p.id}`)
     }
   }
@@ -88,19 +90,19 @@ export default function PieceForm() {
   }
 
   const composerOptions = [
-    { value: '', label: 'Select a composer' },
+    { value: '', label: t('pieceForm.selectComposer') },
     ...composers.map(c => ({ value: String(c.id), label: c.name })),
   ]
 
   return (
     <Paper maw={520} mx="auto" p="xl" withBorder radius="md">
       <Title order={1} mb="lg" style={{ fontFamily: 'Playfair Display, serif' }}>
-        {isEdit ? 'Edit Piece' : 'Add Piece'}
+        {isEdit ? t('pieceForm.editTitle') : t('pieceForm.addTitle')}
       </Title>
       <form onSubmit={submit}>
         <Stack gap="md">
           <TextInput
-            label="Title"
+            label={t('pieceForm.labelTitle')}
             required
             value={title}
             onChange={e => { setTitle(e.target.value); setErrors(v => ({ ...v, title: undefined })) }}
@@ -109,7 +111,7 @@ export default function PieceForm() {
           <div>
             <Group gap="xs" align="flex-end">
               <NativeSelect
-                label="Composer"
+                label={t('pieceForm.labelComposer')}
                 required
                 value={composerId}
                 onChange={e => { setComposerId(e.target.value); setErrors(v => ({ ...v, composer: undefined })) }}
@@ -117,7 +119,7 @@ export default function PieceForm() {
                 error={errors.composer}
                 style={{ flex: 1 }}
               />
-              <Tooltip label="Add a new composer" withArrow>
+              <Tooltip label={t('pieceForm.addNewComposerTooltip')} withArrow>
                 <ActionIcon
                   variant="default"
                   size="lg"
@@ -131,7 +133,7 @@ export default function PieceForm() {
             </Group>
           </div>
           <div>
-            <Text size="sm" fw={500} mb={6}>Difficulty — {difficulty}/10</Text>
+            <Text size="sm" fw={500} mb={6}>{t('pieceForm.labelDifficulty', { value: difficulty })}</Text>
             <Slider
               aria-label="Difficulty (1–10)"
               min={1}
@@ -144,38 +146,38 @@ export default function PieceForm() {
             />
           </div>
           <NativeSelect
-            label="Status"
+            label={t('pieceForm.labelStatus')}
             value={status}
             onChange={e => setStatus(e.target.value)}
             data={[
-              { value: 'wishlist', label: 'Wishlist' },
-              { value: 'learning', label: 'Learning' },
-              { value: 'active',   label: 'Active'   },
-              { value: 'shelved',  label: 'Shelved'  },
+              { value: 'wishlist', label: t('status.wishlist') },
+              { value: 'learning', label: t('status.learning') },
+              { value: 'active',   label: t('status.active')   },
+              { value: 'shelved',  label: t('status.shelved')  },
             ]}
           />
           <Textarea
-            label="Notes"
-            placeholder="e.g. currently working on bars 24–48, focus on left hand"
+            label={t('pieceForm.labelNotes')}
+            placeholder={t('pieceForm.notesPlaceholder')}
             value={notes}
             onChange={e => setNotes(e.target.value)}
             autosize
             minRows={2}
           />
           <DatePickerInput
-            label="Started At"
-            placeholder="Pick a date"
+            label={t('pieceForm.labelStartedAt')}
+            placeholder={t('pieceForm.datePlaceholder')}
             value={startedAt}
-            onChange={setStartedAt}
+            onChange={v => setStartedAt(v as Date | null)}
             clearable
             valueFormat="MMM D, YYYY"
           />
           <Group mt="xs">
             <Button type="submit" flex={1}>
-              {isEdit ? 'Save Changes' : 'Add Piece'}
+              {isEdit ? t('pieceForm.saveChanges') : t('pieceForm.addPiece')}
             </Button>
             <Button type="button" variant="default" flex={1} onClick={() => navigate(-1)}>
-              Cancel
+              {t('pieceForm.cancel')}
             </Button>
           </Group>
         </Stack>
@@ -185,30 +187,30 @@ export default function PieceForm() {
       <Modal
         opened={composerModalOpened}
         onClose={closeComposerModal}
-        title="Add Composer"
+        title={t('pieceForm.composerModal.title')}
         centered
         size="sm"
       >
         <Stack gap="md">
           <TextInput
-            label="Name"
+            label={t('pieceForm.composerModal.labelName')}
             required
-            placeholder="e.g. Johann Sebastian Bach"
+            placeholder={t('pieceForm.composerModal.namePlaceholder')}
             value={newComposerName}
             onChange={e => setNewComposerName(e.target.value)}
           />
           <NativeSelect
-            label="Nationality"
+            label={t('pieceForm.composerModal.labelNationality')}
             value={newComposerNationality}
             onChange={e => setNewComposerNationality(e.target.value)}
             data={[
-              { value: '', label: 'Select nationality (optional)' },
+              { value: '', label: t('pieceForm.composerModal.nationalityPlaceholder') },
               ...COMPOSER_NATIONALITIES.map(n => ({ value: n, label: n })),
             ]}
           />
           <Group justify="flex-end">
-            <Button variant="default" onClick={closeComposerModal}>Cancel</Button>
-            <Button onClick={addComposer} disabled={!newComposerName.trim()}>Add Composer</Button>
+            <Button variant="default" onClick={closeComposerModal}>{t('pieceForm.composerModal.cancel')}</Button>
+            <Button onClick={addComposer} disabled={!newComposerName.trim()}>{t('pieceForm.composerModal.add')}</Button>
           </Group>
         </Stack>
       </Modal>

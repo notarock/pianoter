@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
-import { AppShell, Group, Text, Button, Anchor, Box } from '@mantine/core'
+import { AppShell, Group, Text, Anchor, Box, SegmentedControl } from '@mantine/core'
+import { useTranslation } from 'react-i18next'
 import Dashboard from './pages/Dashboard'
 import Repertoire from './pages/Repertoire'
 import PieceDetail from './pages/PieceDetail'
@@ -18,6 +19,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function Nav() {
   const { user, token, logout } = useAuth()
+  const { t, i18n } = useTranslation()
 
   return (
     <AppShell.Header
@@ -47,9 +49,9 @@ function Nav() {
         {token && (
           <Group gap="xl">
             {[
-              { to: '/', label: 'Dashboard', end: true },
-              { to: '/repertoire', label: 'Repertoire' },
-              { to: '/composers', label: 'Composers' },
+              { to: '/', label: t('nav.dashboard'), end: true },
+              { to: '/repertoire', label: t('nav.repertoire') },
+              { to: '/composers', label: t('nav.composers') },
             ].map(({ to, label, end }) => (
               <NavLink key={to} to={to} end={end}>
                 {({ isActive }) => (
@@ -75,21 +77,32 @@ function Nav() {
           </Group>
         )}
 
-        {/* User + logout */}
-        {user && (
-          <Group gap="md">
-            <Text size="sm" c="dimmed">{user.username}</Text>
-            <Anchor
-              component="button"
-              onClick={logout}
-              size="sm"
-              c="dimmed"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-            >
-              Logout
-            </Anchor>
-          </Group>
-        )}
+        {/* Language switcher + user + logout */}
+        <Group gap="md">
+          <SegmentedControl
+            size="xs"
+            value={i18n.resolvedLanguage === 'fr' ? 'fr' : 'en'}
+            onChange={lang => i18n.changeLanguage(lang)}
+            data={[
+              { label: 'EN', value: 'en' },
+              { label: 'FR', value: 'fr' },
+            ]}
+          />
+          {user && (
+            <>
+              <Text size="sm" c="dimmed">{user.username}</Text>
+              <Anchor
+                component="button"
+                onClick={logout}
+                size="sm"
+                c="dimmed"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                {t('nav.logout')}
+              </Anchor>
+            </>
+          )}
+        </Group>
       </Group>
     </AppShell.Header>
   )

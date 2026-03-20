@@ -4,11 +4,13 @@ import {
   Checkbox, TextInput, NativeSelect, Stack, Center, Tooltip,
 } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
+import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Composer } from '../api/types'
 import { COMPOSER_NATIONALITIES } from '../api/types'
 
 export default function Composers() {
+  const { t } = useTranslation()
   const [composers, setComposers] = useState<Composer[]>([])
   const [name, setName] = useState('')
   const [nationality, setNationality] = useState('')
@@ -34,7 +36,7 @@ export default function Composers() {
     setBornYear('')
     setDiedYear('')
     setShowForm(false)
-    notifications.show({ message: 'Composer added', color: 'teal' })
+    notifications.show({ message: t('composers.notifAdded'), color: 'teal' })
     load()
   }
 
@@ -43,10 +45,10 @@ export default function Composers() {
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="center">
-        <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>Composers</Title>
+        <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{t('composers.title')}</Title>
         <Group gap="md" align="center">
           <Checkbox
-            label="Hide system composers"
+            label={t('composers.hideSystem')}
             checked={hideSystem}
             onChange={e => setHideSystem(e.currentTarget.checked)}
           />
@@ -54,7 +56,7 @@ export default function Composers() {
             variant={showForm ? 'default' : 'filled'}
             onClick={() => setShowForm(v => !v)}
           >
-            {showForm ? 'Cancel' : '+ Add Composer'}
+            {showForm ? t('composers.cancel') : t('composers.addComposer')}
           </Button>
         </Group>
       </Group>
@@ -64,7 +66,7 @@ export default function Composers() {
           <Group gap="sm" wrap="wrap" align="flex-end">
             <TextInput
               required
-              placeholder="Name"
+              placeholder={t('composers.namePlaceholder')}
               value={name}
               onChange={e => setName(e.target.value)}
               style={{ flex: 2, minWidth: 160 }}
@@ -73,26 +75,26 @@ export default function Composers() {
               value={nationality}
               onChange={e => setNationality(e.target.value)}
               data={[
-                { value: '', label: 'Nationality' },
+                { value: '', label: t('composers.nationalityLabel') },
                 ...COMPOSER_NATIONALITIES.map(n => ({ value: n, label: n })),
               ]}
               style={{ minWidth: 160 }}
             />
             <TextInput
-              placeholder="Born year"
+              placeholder={t('composers.bornPlaceholder')}
               type="number"
               value={bornYear}
               onChange={e => setBornYear(e.target.value)}
               w={120}
             />
             <TextInput
-              placeholder="Died year"
+              placeholder={t('composers.diedPlaceholder')}
               type="number"
               value={diedYear}
               onChange={e => setDiedYear(e.target.value)}
               w={120}
             />
-            <Button type="submit">Add</Button>
+            <Button type="submit">{t('composers.add')}</Button>
           </Group>
         </form>
       )}
@@ -100,10 +102,10 @@ export default function Composers() {
       <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
         <Table.Thead style={{ background: '#f9f7f4' }}>
           <Table.Tr>
-            <Table.Th>Name</Table.Th>
-            <Table.Th>Nationality</Table.Th>
-            <Table.Th>Born</Table.Th>
-            <Table.Th>Died</Table.Th>
+            <Table.Th>{t('composers.colName')}</Table.Th>
+            <Table.Th>{t('composers.colNationality')}</Table.Th>
+            <Table.Th>{t('composers.colBorn')}</Table.Th>
+            <Table.Th>{t('composers.colDied')}</Table.Th>
             <Table.Th />
           </Table.Tr>
         </Table.Thead>
@@ -114,8 +116,8 @@ export default function Composers() {
                 <Group gap="xs">
                   {c.name}
                   {c.user_id === 0 && (
-                    <Tooltip label="Built-in composer, shared across all users" withArrow>
-                      <Badge size="xs" color="blue" variant="light">system</Badge>
+                    <Tooltip label={t('composers.systemTooltip')} withArrow>
+                      <Badge size="xs" color="blue" variant="light">{t('composers.systemBadge')}</Badge>
                     </Tooltip>
                   )}
                 </Group>
@@ -131,7 +133,7 @@ export default function Composers() {
                     color="red"
                     onClick={async () => { await api.composers.delete(c.id); load() }}
                   >
-                    Delete
+                    {t('composers.deleteBtn')}
                   </Button>
                 )}
               </Table.Td>
@@ -141,7 +143,7 @@ export default function Composers() {
             <Table.Tr>
               <Table.Td colSpan={5}>
                 <Center py="xl">
-                  <Text c="dimmed">No composers yet.</Text>
+                  <Text c="dimmed">{t('composers.noComposers')}</Text>
                 </Center>
               </Table.Td>
             </Table.Tr>

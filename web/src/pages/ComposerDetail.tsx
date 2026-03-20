@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
   Title, Stack, Table, Badge, Text, Breadcrumbs, Anchor,
-  Group, SimpleGrid, Card, Box,
+  Group, SimpleGrid, Box,
 } from '@mantine/core'
+import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Composer, Piece } from '../api/types'
 import { statusColor, formatDate } from '../utils'
 
 export default function ComposerDetail() {
   const { id } = useParams<{ id: string }>()
+  const { t } = useTranslation()
   const [composer, setComposer] = useState<Composer | null>(null)
   const [pieces, setPieces] = useState<Piece[]>([])
 
@@ -19,7 +21,7 @@ export default function ComposerDetail() {
     api.pieces.list({ composer_id: numId }).then(setPieces)
   }, [id])
 
-  if (!composer) return <Text>Loading...</Text>
+  if (!composer) return <Text>{t('common.loading')}</Text>
 
   const years = [composer.born_year, composer.died_year].filter(Boolean)
   const lifespan = years.length === 2 ? `${years[0]} – ${years[1]}` : years[0] ? `b. ${years[0]}` : null
@@ -27,46 +29,46 @@ export default function ComposerDetail() {
   return (
     <Stack gap="lg">
       <Breadcrumbs fz="sm" c="dimmed">
-        <Anchor component={Link} to="/composers" c="dimmed" fz="sm">Composers</Anchor>
+        <Anchor component={Link} to="/composers" c="dimmed" fz="sm">{t('nav.composers')}</Anchor>
         <Text span fz="sm" c="#1A1612">{composer.name}</Text>
       </Breadcrumbs>
 
       <Group align="flex-end" gap="sm">
         <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{composer.name}</Title>
         {composer.user_id === 0 && (
-          <Badge size="sm" color="blue" variant="light" mb={4}>system</Badge>
+          <Badge size="sm" color="blue" variant="light" mb={4}>{t('composers.systemBadge')}</Badge>
         )}
       </Group>
 
       <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" maw={480}>
         {composer.nationality && (
           <Box>
-            <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={2}>Nationality</Text>
+            <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={2}>{t('composerDetail.labelNationality')}</Text>
             <Text size="sm">{composer.nationality}</Text>
           </Box>
         )}
         {lifespan && (
           <Box>
-            <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={2}>Years</Text>
+            <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={2}>{t('composerDetail.labelYears')}</Text>
             <Text size="sm">{lifespan}</Text>
           </Box>
         )}
         <Box>
-          <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={2}>Pieces in repertoire</Text>
+          <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={2}>{t('composerDetail.labelPieces')}</Text>
           <Text size="sm">{pieces.length}</Text>
         </Box>
       </SimpleGrid>
 
       {pieces.length > 0 && (
         <Box>
-          <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>Pieces</Title>
+          <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>{t('composerDetail.piecesTitle')}</Title>
           <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
             <Table.Thead style={{ background: '#f9f7f4' }}>
               <Table.Tr>
-                <Table.Th>Title</Table.Th>
-                <Table.Th>Difficulty</Table.Th>
-                <Table.Th>Status</Table.Th>
-                <Table.Th>Last Played</Table.Th>
+                <Table.Th>{t('composerDetail.colTitle')}</Table.Th>
+                <Table.Th>{t('composerDetail.colDifficulty')}</Table.Th>
+                <Table.Th>{t('composerDetail.colStatus')}</Table.Th>
+                <Table.Th>{t('composerDetail.colLastPlayed')}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -77,9 +79,9 @@ export default function ComposerDetail() {
                   </Table.Td>
                   <Table.Td>{p.difficulty}/10</Table.Td>
                   <Table.Td>
-                    <Badge color={statusColor(p.status)} variant="light" radius="sm">{p.status}</Badge>
+                    <Badge color={statusColor(p.status)} variant="light" radius="sm">{t(`status.${p.status}`)}</Badge>
                   </Table.Td>
-                  <Table.Td>{formatDate(p.last_played_at) ?? 'Never'}</Table.Td>
+                  <Table.Td>{formatDate(p.last_played_at) ?? t('common.never')}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
@@ -88,7 +90,7 @@ export default function ComposerDetail() {
       )}
 
       {pieces.length === 0 && (
-        <Text c="dimmed" size="sm">No pieces by this composer in your repertoire yet.</Text>
+        <Text c="dimmed" size="sm">{t('composerDetail.noPieces')}</Text>
       )}
     </Stack>
   )

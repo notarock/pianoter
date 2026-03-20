@@ -5,25 +5,17 @@ import {
   Text, Textarea, NativeSelect, Box, Timeline, Breadcrumbs, Anchor, Progress, Modal,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
+import { Trans, useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import { PLAYING_LEVELS } from '../api/types'
 import type { Piece, PlaySession, PlayingLevel } from '../api/types'
 import { statusColor, formatDate } from '../utils'
 import { notifications } from '@mantine/notifications'
 
-function levelLabel(key: PlayingLevel | ''): string {
-  if (!key) return '—'
-  return PLAYING_LEVELS.find(l => l.key === key)?.label ?? key
-}
-
-function levelDescription(key: PlayingLevel | ''): string {
-  if (!key) return ''
-  return PLAYING_LEVELS.find(l => l.key === key)?.description ?? ''
-}
-
 export default function PieceDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [piece, setPiece] = useState<Piece | null>(null)
   const [sessions, setSessions] = useState<PlaySession[]>([])
   const [notes, setNotes] = useState('')
@@ -43,7 +35,7 @@ export default function PieceDetail() {
     const data: { notes?: string; playing_level?: PlayingLevel } = { notes }
     if (playingLevel) data.playing_level = playingLevel
     await api.sessions.create(Number(id), data)
-    notifications.show({ message: 'Practice session logged', color: 'teal' })
+    notifications.show({ message: t('pieceDetail.notifLogged'), color: 'teal' })
     setNotes('')
     setPlayingLevel('')
     setLogging(false)
@@ -55,7 +47,7 @@ export default function PieceDetail() {
     navigate('/repertoire')
   }
 
-  if (!piece) return <Text>Loading...</Text>
+  if (!piece) return <Text>{t('common.loading')}</Text>
 
   // Sessions ordered oldest→newest for progression analysis
   const chronological = [...sessions].reverse()
@@ -67,18 +59,30 @@ export default function PieceDetail() {
     }
   }
 
+  const levelLabel = (key: PlayingLevel | '') => {
+    if (!key) return '—'
+    const levelKey = key as string
+    return t(`levels.${levelKey}.label`, { defaultValue: key })
+  }
+
+  const levelDescription = (key: PlayingLevel | '') => {
+    if (!key) return ''
+    const levelKey = key as string
+    return t(`levels.${levelKey}.description`, { defaultValue: '' })
+  }
+
   return (
     <Stack gap="lg">
       <Breadcrumbs fz="sm" c="dimmed">
-        <Anchor component={Link} to="/repertoire" c="dimmed" fz="sm">Repertoire</Anchor>
+        <Anchor component={Link} to="/repertoire" c="dimmed" fz="sm">{t('nav.repertoire')}</Anchor>
         <Text span fz="sm" c="#1A1612">{piece.title}</Text>
       </Breadcrumbs>
 
       <Group justify="space-between" align="center">
         <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{piece.title}</Title>
         <Group gap="sm">
-          <Button component={Link} to={`/pieces/${id}/edit`} variant="default">Edit</Button>
-          <Button onClick={openDelete} color="red" variant="light">Delete</Button>
+          <Button component={Link} to={`/pieces/${id}/edit`} variant="default">{t('common.edit', 'Edit')}</Button>
+          <Button onClick={openDelete} color="red" variant="light">{t('common.delete', 'Delete')}</Button>
         </Group>
       </Group>
 
@@ -86,11 +90,11 @@ export default function PieceDetail() {
       <Table w="auto" withRowBorders={false} verticalSpacing={4}>
         <Table.Tbody>
           <Table.Tr>
-            <Table.Td c="dimmed" pr="xl">Composer</Table.Td>
+            <Table.Td c="dimmed" pr="xl">{t('pieceDetail.colComposer')}</Table.Td>
             <Table.Td>{piece.composer?.name ?? '—'}</Table.Td>
           </Table.Tr>
           <Table.Tr>
-            <Table.Td c="dimmed" pr="xl">Difficulty</Table.Td>
+            <Table.Td c="dimmed" pr="xl">{t('pieceDetail.colDifficulty')}</Table.Td>
             <Table.Td>
               <Group gap="sm" align="center">
                 <Progress
@@ -104,28 +108,28 @@ export default function PieceDetail() {
             </Table.Td>
           </Table.Tr>
           <Table.Tr>
-            <Table.Td c="dimmed" pr="xl">Status</Table.Td>
+            <Table.Td c="dimmed" pr="xl">{t('pieceDetail.colStatus')}</Table.Td>
             <Table.Td>
               <Badge color={statusColor(piece.status)} variant="light" radius="sm">
-                {piece.status}
+                {t(`status.${piece.status}`)}
               </Badge>
             </Table.Td>
           </Table.Tr>
           <Table.Tr>
-            <Table.Td c="dimmed" pr="xl">Started</Table.Td>
+            <Table.Td c="dimmed" pr="xl">{t('pieceDetail.colStarted')}</Table.Td>
             <Table.Td>{formatDate(piece.started_at) ?? '—'}</Table.Td>
           </Table.Tr>
           <Table.Tr>
-            <Table.Td c="dimmed" pr="xl">Last Played</Table.Td>
-            <Table.Td>{formatDate(piece.last_played_at) ?? 'Never'}</Table.Td>
+            <Table.Td c="dimmed" pr="xl">{t('pieceDetail.colLastPlayed')}</Table.Td>
+            <Table.Td>{formatDate(piece.last_played_at) ?? t('common.never')}</Table.Td>
           </Table.Tr>
           <Table.Tr>
-            <Table.Td c="dimmed" pr="xl">Current Level</Table.Td>
+            <Table.Td c="dimmed" pr="xl">{t('pieceDetail.colCurrentLevel')}</Table.Td>
             <Table.Td>{levelLabel(piece.current_level)}</Table.Td>
           </Table.Tr>
           {piece.notes && (
             <Table.Tr>
-              <Table.Td c="dimmed" pr="xl" style={{ verticalAlign: 'top' }}>Notes</Table.Td>
+              <Table.Td c="dimmed" pr="xl" style={{ verticalAlign: 'top' }}>{t('pieceDetail.colNotes')}</Table.Td>
               <Table.Td style={{ whiteSpace: 'pre-wrap' }}>{piece.notes}</Table.Td>
             </Table.Tr>
           )}
@@ -138,28 +142,28 @@ export default function PieceDetail() {
           variant={logging ? 'default' : 'filled'}
           onClick={() => setLogging(v => !v)}
         >
-          {logging ? 'Cancel' : '+ Log Practice Session'}
+          {logging ? t('pieceDetail.cancelLog') : t('pieceDetail.logSession')}
         </Button>
         {logging && (
           <Stack gap="sm" mt="sm">
             <Group align="flex-end">
               <Textarea
-                placeholder="Notes (optional)"
+                placeholder={t('pieceDetail.notesPlaceholder')}
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
                 autosize
                 minRows={1}
                 style={{ flex: 1 }}
               />
-              <Button onClick={logSession}>Save</Button>
+              <Button onClick={logSession}>{t('pieceDetail.saveSession')}</Button>
             </Group>
             <Box>
               <NativeSelect
                 value={playingLevel}
                 onChange={e => setPlayingLevel(e.target.value as PlayingLevel | '')}
                 data={[
-                  { value: '', label: '— No level recorded —' },
-                  ...PLAYING_LEVELS.map(l => ({ value: l.key, label: l.label })),
+                  { value: '', label: t('pieceDetail.noLevel') },
+                  ...PLAYING_LEVELS.map(l => ({ value: l.key, label: t(`levels.${l.key}.label`) })),
                 ]}
               />
               {playingLevel && (
@@ -173,13 +177,13 @@ export default function PieceDetail() {
       {/* Level progression */}
       {levelChanges.length > 1 && (
         <Box>
-          <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>Level Progression</Title>
+          <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>{t('pieceDetail.levelProgressionTitle')}</Title>
           <Table striped withTableBorder verticalSpacing="xs" fz="sm">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Level</Table.Th>
-                <Table.Th>Reached</Table.Th>
-                <Table.Th>Days spent</Table.Th>
+                <Table.Th>{t('pieceDetail.colLevel')}</Table.Th>
+                <Table.Th>{t('pieceDetail.colReached')}</Table.Th>
+                <Table.Th>{t('pieceDetail.colDaysSpent')}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -191,7 +195,11 @@ export default function PieceDetail() {
                   <Table.Tr key={lc.level}>
                     <Table.Td>{levelLabel(lc.level)}</Table.Td>
                     <Table.Td>{start.toLocaleDateString()}</Table.Td>
-                    <Table.Td>{i + 1 < levelChanges.length ? `${days}d` : `${days}d (ongoing)`}</Table.Td>
+                    <Table.Td>
+                      {i + 1 < levelChanges.length
+                        ? t('pieceDetail.days', { count: days })
+                        : t('pieceDetail.daysOngoing', { count: days })}
+                    </Table.Td>
                   </Table.Tr>
                 )
               })}
@@ -202,9 +210,9 @@ export default function PieceDetail() {
 
       {/* Practice history */}
       <Box>
-        <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>Practice History</Title>
+        <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>{t('pieceDetail.practiceHistoryTitle')}</Title>
         {sessions.length === 0 ? (
-          <Text c="dimmed">No sessions logged yet.</Text>
+          <Text c="dimmed">{t('pieceDetail.noSessions')}</Text>
         ) : (
           <Timeline active={sessions.length} bulletSize={12} lineWidth={2}>
             {sessions.map((s, i) => {
@@ -236,16 +244,20 @@ export default function PieceDetail() {
       <Modal
         opened={deleteOpened}
         onClose={closeDelete}
-        title="Delete piece?"
+        title={t('pieceDetail.deleteModal.title')}
         centered
         size="sm"
       >
         <Text size="sm" c="dimmed" mb="lg">
-          This will permanently delete <strong>{piece.title}</strong> and all its practice sessions. This cannot be undone.
+          <Trans
+            i18nKey="pieceDetail.deleteModal.desc"
+            values={{ title: piece.title }}
+            components={{ bold: <strong /> }}
+          />
         </Text>
         <Group justify="flex-end">
-          <Button variant="default" onClick={closeDelete}>Cancel</Button>
-          <Button color="red" onClick={deletePiece}>Delete</Button>
+          <Button variant="default" onClick={closeDelete}>{t('pieceDetail.deleteModal.cancel')}</Button>
+          <Button color="red" onClick={deletePiece}>{t('pieceDetail.deleteModal.delete')}</Button>
         </Group>
       </Modal>
     </Stack>

@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom'
+import './i18n'
 
 // jsdom doesn't implement window.matchMedia or ResizeObserver — mock both for Mantine.
-global.ResizeObserver = class ResizeObserver {
+window.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
   disconnect() {}

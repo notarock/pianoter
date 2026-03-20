@@ -1,12 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Paper, Title, TextInput, PasswordInput, Button, Text, Anchor, Stack, Alert } from '@mantine/core'
+import { useTranslation } from 'react-i18next'
 import { authApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
 export default function Register() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -17,7 +19,7 @@ export default function Register() {
     e.preventDefault()
     setError('')
     if (password !== confirm) {
-      setError('Passwords do not match')
+      setError(t('register.errorNoMatch'))
       return
     }
     setLoading(true)
@@ -26,7 +28,7 @@ export default function Register() {
       login(res.token, res.user)
       navigate('/')
     } catch {
-      setError('Registration failed — username may already be taken')
+      setError(t('register.errorFailed'))
     } finally {
       setLoading(false)
     }
@@ -43,26 +45,26 @@ export default function Register() {
       style={{ border: '1px solid var(--app-border)' }}
     >
       <Title order={2} ta="center" mb="xl" style={{ fontFamily: 'Playfair Display, serif' }}>
-        Create an account
+        {t('register.title')}
       </Title>
 
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           <TextInput
-            label="Username"
+            label={t('register.labelUsername')}
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
             autoFocus
           />
           <PasswordInput
-            label="Password"
+            label={t('register.labelPassword')}
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
           />
           <PasswordInput
-            label="Confirm password"
+            label={t('register.labelConfirm')}
             value={confirm}
             onChange={e => setConfirm(e.target.value)}
             required
@@ -73,15 +75,15 @@ export default function Register() {
             </Alert>
           )}
           <Button type="submit" fullWidth loading={loading} mt="xs">
-            Register
+            {t('register.submitBtn')}
           </Button>
         </Stack>
       </form>
 
       <Text ta="center" mt="md" size="sm" c="dimmed">
-        Already have an account?{' '}
+        {t('register.haveAccount')}{' '}
         <Anchor component={Link} to="/login" c="terracotta">
-          Sign in
+          {t('register.signInLink')}
         </Anchor>
       </Text>
     </Paper>

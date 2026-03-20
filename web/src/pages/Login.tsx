@@ -1,12 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Paper, Title, TextInput, PasswordInput, Button, Text, Anchor, Stack, Alert } from '@mantine/core'
+import { useTranslation } from 'react-i18next'
 import { authApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -21,7 +23,7 @@ export default function Login() {
       login(res.token, res.user)
       navigate('/')
     } catch {
-      setError('Invalid username or password')
+      setError(t('login.errorInvalid'))
     } finally {
       setLoading(false)
     }
@@ -38,20 +40,20 @@ export default function Login() {
       style={{ border: '1px solid var(--app-border)' }}
     >
       <Title order={2} ta="center" mb="xl" style={{ fontFamily: 'Playfair Display, serif' }}>
-        Sign in to Pianoter
+        {t('login.title')}
       </Title>
 
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           <TextInput
-            label="Username"
+            label={t('login.labelUsername')}
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
             autoFocus
           />
           <PasswordInput
-            label="Password"
+            label={t('login.labelPassword')}
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -62,15 +64,15 @@ export default function Login() {
             </Alert>
           )}
           <Button type="submit" fullWidth loading={loading} mt="xs">
-            Sign in
+            {t('login.submitBtn')}
           </Button>
         </Stack>
       </form>
 
       <Text ta="center" mt="md" size="sm" c="dimmed">
-        No account?{' '}
+        {t('login.noAccount')}{' '}
         <Anchor component={Link} to="/register" c="terracotta">
-          Register
+          {t('login.registerLink')}
         </Anchor>
       </Text>
     </Paper>

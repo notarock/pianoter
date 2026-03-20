@@ -4,11 +4,13 @@ import {
   Title, Group, Button, Select, Table, Badge,
   Anchor, Text, Center, Stack, TextInput,
 } from '@mantine/core'
+import { Trans, useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Piece, Composer } from '../api/types'
 import { statusColor, formatDate } from '../utils'
 
 export default function Repertoire() {
+  const { t } = useTranslation()
   const [pieces, setPieces] = useState<Piece[]>([])
   const [composers, setComposers] = useState<Composer[]>([])
   const [status, setStatus] = useState<string | null>(null)
@@ -28,44 +30,41 @@ export default function Repertoire() {
       .then(setPieces)
   }, [status, composerId])
 
-  const composerOptions = [
-    { value: '', label: 'All composers' },
-    ...composers.map(c => ({ value: String(c.id), label: c.name })),
-  ]
+  const composerOptions = composers.map(c => ({ value: String(c.id), label: c.name }))
 
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="center">
-        <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>Repertoire</Title>
-        <Button component={Link} to="/pieces/new">+ Add Piece</Button>
+        <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{t('repertoire.title')}</Title>
+        <Button component={Link} to="/pieces/new">{t('repertoire.addPiece')}</Button>
       </Group>
 
       {/* Filters */}
       <Group gap="sm" wrap="wrap">
         <Select
-          placeholder="All statuses"
+          placeholder={t('repertoire.allStatuses')}
           value={status}
           onChange={setStatus}
           clearable
           data={[
-            { value: 'wishlist', label: 'Wishlist' },
-            { value: 'learning', label: 'Learning' },
-            { value: 'active',   label: 'Active'   },
-            { value: 'shelved',  label: 'Shelved'  },
+            { value: 'wishlist', label: t('status.wishlist') },
+            { value: 'learning', label: t('status.learning') },
+            { value: 'active',   label: t('status.active')   },
+            { value: 'shelved',  label: t('status.shelved')  },
           ]}
           w={160}
         />
         <Select
-          placeholder="All composers"
+          placeholder={t('repertoire.allComposers')}
           value={composerId}
           onChange={setComposerId}
           clearable
           searchable
-          data={composerOptions.slice(1)}
+          data={composerOptions}
           w={220}
         />
         <TextInput
-          placeholder="Search by title…"
+          placeholder={t('repertoire.searchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           w={200}
@@ -76,11 +75,11 @@ export default function Repertoire() {
       <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
         <Table.Thead style={{ background: '#f9f7f4' }}>
           <Table.Tr>
-            <Table.Th>Title</Table.Th>
-            <Table.Th>Composer</Table.Th>
-            <Table.Th>Difficulty</Table.Th>
-            <Table.Th>Status</Table.Th>
-            <Table.Th>Last Played</Table.Th>
+            <Table.Th>{t('repertoire.colTitle')}</Table.Th>
+            <Table.Th>{t('repertoire.colComposer')}</Table.Th>
+            <Table.Th>{t('repertoire.colDifficulty')}</Table.Th>
+            <Table.Th>{t('repertoire.colStatus')}</Table.Th>
+            <Table.Th>{t('repertoire.colLastPlayed')}</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -99,10 +98,10 @@ export default function Repertoire() {
               <Table.Td>{p.difficulty}/10</Table.Td>
               <Table.Td>
                 <Badge color={statusColor(p.status)} variant="light" radius="sm">
-                  {p.status}
+                  {t(`status.${p.status}`)}
                 </Badge>
               </Table.Td>
-              <Table.Td>{formatDate(p.last_played_at) ?? 'Never'}</Table.Td>
+              <Table.Td>{formatDate(p.last_played_at) ?? t('common.never')}</Table.Td>
             </Table.Tr>
           ))}
           {pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase())).length === 0 && (
@@ -112,12 +111,17 @@ export default function Repertoire() {
                   <Center py={48}>
                     <Stack align="center" gap="sm">
                       <Text size="2.5rem" lh={1}>🎹</Text>
-                      <Text fw={600} size="lg" c="#1A1612">No pieces yet</Text>
-                      <Text c="dimmed" size="sm">Use the <strong>+ Add Piece</strong> button above to get started.</Text>
+                      <Text fw={600} size="lg" c="#1A1612">{t('repertoire.noPiecesTitle')}</Text>
+                      <Text c="dimmed" size="sm">
+                        <Trans
+                          i18nKey="repertoire.noPiecesDesc"
+                          components={{ bold: <strong /> }}
+                        />
+                      </Text>
                     </Stack>
                   </Center>
                 ) : (
-                  <Text c="dimmed" ta="center" py="xl">No pieces match your filters.</Text>
+                  <Text c="dimmed" ta="center" py="xl">{t('repertoire.noMatchFilters')}</Text>
                 )}
               </Table.Td>
             </Table.Tr>

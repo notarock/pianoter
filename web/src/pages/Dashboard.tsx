@@ -2,23 +2,18 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Title, Text, SimpleGrid, Card, Table, Badge, Button,
-  Center, Stack, Group, Anchor,
+  Center, Stack, Anchor,
 } from '@mantine/core'
+import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Piece } from '../api/types'
 import { useAuth } from '../context/AuthContext'
 import { statusColor, formatDate } from '../utils'
 
-const STATUS_CARDS = [
-  { status: 'wishlist', label: 'Wishlist' },
-  { status: 'learning', label: 'Learning' },
-  { status: 'active',   label: 'Active'   },
-  { status: 'shelved',  label: 'Shelved'  },
-] as const
-
 export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [stale, setStale] = useState<Piece[]>([])
   const [all, setAll] = useState<Piece[]>([])
 
@@ -29,10 +24,17 @@ export default function Dashboard() {
 
   const byStatus = (s: string) => all.filter(p => p.status === s).length
 
+  const STATUS_CARDS = [
+    { status: 'wishlist', label: t('status.wishlist') },
+    { status: 'learning', label: t('status.learning') },
+    { status: 'active',   label: t('status.active')   },
+    { status: 'shelved',  label: t('status.shelved')  },
+  ] as const
+
   return (
     <Stack gap="xl">
       <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>
-        Welcome back, {user?.username} 👋
+        {t('dashboard.welcome', { username: user?.username })}
       </Title>
 
       {/* Status stat cards */}
@@ -81,10 +83,10 @@ export default function Dashboard() {
           <Center>
             <Stack align="center" gap="sm">
               <Text size="2.5rem" lh={1}>🎼</Text>
-              <Text fw={600} size="lg" c="#1A1612">Your repertoire is empty</Text>
-              <Text c="dimmed" size="sm">Add pieces to start tracking your practice.</Text>
+              <Text fw={600} size="lg" c="#1A1612">{t('dashboard.emptyTitle')}</Text>
+              <Text c="dimmed" size="sm">{t('dashboard.emptyDesc')}</Text>
               <Button component={Link} to="/repertoire" mt="xs">
-                Go to Repertoire
+                {t('dashboard.goToRepertoire')}
               </Button>
             </Stack>
           </Center>
@@ -94,19 +96,20 @@ export default function Dashboard() {
       {/* To Revisit */}
       <div>
         <Title order={2} mb="md" style={{ fontFamily: 'Playfair Display, serif' }}>
-          To Revisit <Text span size="sm" c="dimmed" fw={400}>(not played in 30+ days)</Text>
+          {t('dashboard.toRevisitTitle')}{' '}
+          <Text span size="sm" c="dimmed" fw={400}>{t('dashboard.toRevisitSub')}</Text>
         </Title>
 
         {stale.length === 0 ? (
-          <Text c="dimmed" size="sm">All caught up! No pieces overdue for practice.</Text>
+          <Text c="dimmed" size="sm">{t('dashboard.allCaughtUp')}</Text>
         ) : (
           <Table striped highlightOnHover withTableBorder withColumnBorders={false} verticalSpacing="sm">
             <Table.Thead style={{ background: '#f9f7f4' }}>
               <Table.Tr>
-                <Table.Th>Title</Table.Th>
-                <Table.Th>Composer</Table.Th>
-                <Table.Th>Last Played</Table.Th>
-                <Table.Th>Status</Table.Th>
+                <Table.Th>{t('dashboard.colTitle')}</Table.Th>
+                <Table.Th>{t('dashboard.colComposer')}</Table.Th>
+                <Table.Th>{t('dashboard.colLastPlayed')}</Table.Th>
+                <Table.Th>{t('dashboard.colStatus')}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -122,10 +125,10 @@ export default function Dashboard() {
                       ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
                       : '—'}
                   </Table.Td>
-                  <Table.Td>{formatDate(p.last_played_at) ?? 'Never'}</Table.Td>
+                  <Table.Td>{formatDate(p.last_played_at) ?? t('common.never')}</Table.Td>
                   <Table.Td>
                     <Badge color={statusColor(p.status)} variant="light" radius="sm">
-                      {p.status}
+                      {t(`status.${p.status}`)}
                     </Badge>
                   </Table.Td>
                 </Table.Tr>
