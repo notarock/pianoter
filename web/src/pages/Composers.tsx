@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
-  Title, Group, Button, Table, Badge, Text,
-  Checkbox, TextInput, NativeSelect, Stack, Center, Tooltip,
+  Title, Group, Button, Badge, Text,
+  Checkbox, TextInput, NativeSelect, Stack, Tooltip,
 } from '@mantine/core'
+import { DataTable, type DataTableSortStatus } from 'mantine-datatable'
 import { notifications } from '@mantine/notifications'
 import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Composer } from '../api/types'
 import { COMPOSER_NATIONALITIES } from '../api/types'
+
+const PAGE_SIZE = 20
 
 export default function Composers() {
   const { t } = useTranslation()
@@ -18,10 +21,16 @@ export default function Composers() {
   const [diedYear, setDiedYear] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [hideSystem, setHideSystem] = useState(false)
+  const [page, setPage] = useState(1)
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Composer>>({
+    columnAccessor: 'name',
+    direction: 'asc',
+  })
 
   const load = () => api.composers.list().then(setComposers)
 
   useEffect(() => { load() }, [])
+  useEffect(() => { setPage(1) }, [hideSystem, sortStatus])
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,7 +49,25 @@ export default function Composers() {
     load()
   }
 
-  const visible = composers.filter(c => !hideSystem || c.user_id !== 0)
+  const filtered = useMemo(() =>
+    composers.filter(c => !hideSystem || c.user_id !== 0),
+    [composers, hideSystem])
+
+  const sorted = useMemo(() => {
+    const { columnAccessor, direction } = sortStatus
+    return [...filtered].sort((a, b) => {
+      const av = a[columnAccessor as keyof Composer] ?? ''
+      const bv = b[columnAccessor as keyof Composer] ?? ''
+      const cmp = typeof av === 'number' && typeof bv === 'number'
+        ? av - bv
+        : String(av).localeCompare(String(bv))
+      return direction === 'asc' ? cmp : -cmp
+    })
+  }, [filtered, sortStatus])
+
+  const paginated = useMemo(() =>
+    sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [sorted, page])
 
   return (
     <Stack gap="lg">
@@ -99,57 +126,70 @@ export default function Composers() {
         </form>
       )}
 
-      <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
-        <Table.Thead style={{ background: '#f5f5f5' }}>
-          <Table.Tr>
-            <Table.Th>{t('composers.colName')}</Table.Th>
-            <Table.Th>{t('composers.colNationality')}</Table.Th>
-            <Table.Th>{t('composers.colBorn')}</Table.Th>
-            <Table.Th>{t('composers.colDied')}</Table.Th>
-            <Table.Th />
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {visible.map(c => (
-            <Table.Tr key={c.id}>
-              <Table.Td>
-                <Group gap="xs">
-                  {c.name}
-                  {c.user_id === 0 && (
-                    <Tooltip label={t('composers.systemTooltip')} withArrow>
-                      <Badge size="xs" color="gray" variant="light">{t('composers.systemBadge')}</Badge>
-                    </Tooltip>
-                  )}
-                </Group>
-              </Table.Td>
-              <Table.Td c="dimmed">{c.nationality || '—'}</Table.Td>
-              <Table.Td c="dimmed">{c.born_year ?? '—'}</Table.Td>
-              <Table.Td c="dimmed">{c.died_year ?? '—'}</Table.Td>
-              <Table.Td ta="right">
-                {c.user_id !== 0 && (
-                  <Button
-                    size="xs"
-                    variant="subtle"
-                    color="red"
-                    onClick={async () => { await api.composers.delete(c.id); load() }}
-                  >
-                    {t('composers.deleteBtn')}
-                  </Button>
+      <DataTable
+        striped
+        highlightOnHover
+        withTableBorder
+        verticalSpacing="sm"
+        records={paginated}
+        totalRecords={filtered.length}
+        recordsPerPage={PAGE_SIZE}
+        page={page}
+        onPageChange={setPage}
+        sortStatus={sortStatus}
+        onSortStatusChange={setSortStatus}
+        noRecordsText={t('composers.noComposers')}
+        columns={[
+          {
+            accessor: 'name',
+            title: t('composers.colName'),
+            sortable: true,
+            render: c => (
+              <Group gap="xs">
+                {c.name}
+                {c.user_id === 0 && (
+                  <Tooltip label={t('composers.systemTooltip')} withArrow>
+                    <Badge size="xs" color="gray" variant="light">{t('composers.systemBadge')}</Badge>
+                  </Tooltip>
                 )}
-              </Table.Td>
-            </Table.Tr>
-          ))}
-          {visible.length === 0 && (
-            <Table.Tr>
-              <Table.Td colSpan={5}>
-                <Center py="xl">
-                  <Text c="dimmed">{t('composers.noComposers')}</Text>
-                </Center>
-              </Table.Td>
-            </Table.Tr>
-          )}
-        </Table.Tbody>
-      </Table>
+              </Group>
+            ),
+          },
+          {
+            accessor: 'nationality',
+            title: t('composers.colNationality'),
+            sortable: true,
+            render: c => <Text c="dimmed" size="sm">{c.nationality || '—'}</Text>,
+          },
+          {
+            accessor: 'born_year',
+            title: t('composers.colBorn'),
+            sortable: true,
+            render: c => <Text c="dimmed" size="sm">{c.born_year ?? '—'}</Text>,
+          },
+          {
+            accessor: 'died_year',
+            title: t('composers.colDied'),
+            sortable: true,
+            render: c => <Text c="dimmed" size="sm">{c.died_year ?? '—'}</Text>,
+          },
+          {
+            accessor: 'actions',
+            title: '',
+            textAlign: 'right',
+            render: c => c.user_id !== 0 ? (
+              <Button
+                size="xs"
+                variant="subtle"
+                color="red"
+                onClick={async () => { await api.composers.delete(c.id); load() }}
+              >
+                {t('composers.deleteBtn')}
+              </Button>
+            ) : null,
+          },
+        ]}
+      />
     </Stack>
   )
 }

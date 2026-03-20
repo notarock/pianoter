@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Title, Group, Button, Select, Table, Badge,
+  Title, Group, Button, Select, Badge,
   Anchor, Text, Center, Stack, TextInput,
 } from '@mantine/core'
+import { DataTable, type DataTableSortStatus } from 'mantine-datatable'
 import { Trans, useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Piece, Composer } from '../api/types'
 import { statusColor, formatDate } from '../utils'
+
+const PAGE_SIZE = 20
 
 export default function Repertoire() {
   const { t } = useTranslation()
@@ -16,6 +19,11 @@ export default function Repertoire() {
   const [status, setStatus] = useState<string | null>(null)
   const [composerId, setComposerId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Piece>>({
+    columnAccessor: 'title',
+    direction: 'asc',
+  })
 
   useEffect(() => {
     api.composers.list().then(setComposers)
@@ -30,7 +38,32 @@ export default function Repertoire() {
       .then(setPieces)
   }, [status, composerId])
 
+  useEffect(() => { setPage(1) }, [status, composerId, search, sortStatus])
+
   const composerOptions = composers.map(c => ({ value: String(c.id), label: c.name }))
+
+  const filtered = useMemo(() =>
+    pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase())),
+    [pieces, search])
+
+  const sorted = useMemo(() => {
+    const { columnAccessor, direction } = sortStatus
+    return [...filtered].sort((a, b) => {
+      let av: unknown = a[columnAccessor as keyof Piece]
+      let bv: unknown = b[columnAccessor as keyof Piece]
+      if (columnAccessor === 'composer') { av = a.composer?.name ?? ''; bv = b.composer?.name ?? '' }
+      if (av == null) return 1
+      if (bv == null) return -1
+      const cmp = typeof av === 'number' && typeof bv === 'number'
+        ? av - bv
+        : String(av).localeCompare(String(bv))
+      return direction === 'asc' ? cmp : -cmp
+    })
+  }, [filtered, sortStatus])
+
+  const paginated = useMemo(() =>
+    sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [sorted, page])
 
   return (
     <Stack gap="lg">
@@ -39,7 +72,6 @@ export default function Repertoire() {
         <Button component={Link} to="/pieces/new">{t('repertoire.addPiece')}</Button>
       </Group>
 
-      {/* Filters */}
       <Group gap="sm" wrap="wrap">
         <Select
           placeholder={t('repertoire.allStatuses')}
@@ -71,63 +103,74 @@ export default function Repertoire() {
         />
       </Group>
 
-      {/* Table — always rendered so headers are always visible */}
-      <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
-        <Table.Thead style={{ background: '#f5f5f5' }}>
-          <Table.Tr>
-            <Table.Th>{t('repertoire.colTitle')}</Table.Th>
-            <Table.Th>{t('repertoire.colComposer')}</Table.Th>
-            <Table.Th>{t('repertoire.colDifficulty')}</Table.Th>
-            <Table.Th>{t('repertoire.colStatus')}</Table.Th>
-            <Table.Th>{t('repertoire.colLastPlayed')}</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase())).map(p => (
-            <Table.Tr key={p.id}>
-              <Table.Td>
+      {pieces.length === 0 && !status && !composerId && !search ? (
+        <Center py={48}>
+          <Stack align="center" gap="sm">
+            <Text size="2.5rem" lh={1}>🎹</Text>
+            <Text fw={600} size="lg" c="#1A1612">{t('repertoire.noPiecesTitle')}</Text>
+            <Text c="dimmed" size="sm">
+              <Trans i18nKey="repertoire.noPiecesDesc" components={{ bold: <strong /> }} />
+            </Text>
+          </Stack>
+        </Center>
+      ) : (
+        <DataTable
+          striped
+          highlightOnHover
+          withTableBorder
+          verticalSpacing="sm"
+          records={paginated}
+          totalRecords={filtered.length}
+          recordsPerPage={PAGE_SIZE}
+          page={page}
+          onPageChange={setPage}
+          sortStatus={sortStatus}
+          onSortStatusChange={setSortStatus}
+          noRecordsText={t('repertoire.noMatchFilters')}
+          columns={[
+            {
+              accessor: 'title',
+              title: t('repertoire.colTitle'),
+              sortable: true,
+              render: p => (
                 <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>
                   {p.title}
                 </Anchor>
-              </Table.Td>
-              <Table.Td c="dimmed">
-                {p.composer
-                  ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
-                  : '—'}
-              </Table.Td>
-              <Table.Td>{p.difficulty}/10</Table.Td>
-              <Table.Td>
+              ),
+            },
+            {
+              accessor: 'composer',
+              title: t('repertoire.colComposer'),
+              sortable: true,
+              render: p => p.composer
+                ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
+                : '—',
+            },
+            {
+              accessor: 'difficulty',
+              title: t('repertoire.colDifficulty'),
+              sortable: true,
+              render: p => `${p.difficulty}/10`,
+            },
+            {
+              accessor: 'status',
+              title: t('repertoire.colStatus'),
+              sortable: true,
+              render: p => (
                 <Badge color={statusColor(p.status)} variant="light" radius="sm">
                   {t(`status.${p.status}`)}
                 </Badge>
-              </Table.Td>
-              <Table.Td>{formatDate(p.last_played_at) ?? t('common.never')}</Table.Td>
-            </Table.Tr>
-          ))}
-          {pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase())).length === 0 && (
-            <Table.Tr>
-              <Table.Td colSpan={5}>
-                {!status && !composerId && !search ? (
-                  <Center py={48}>
-                    <Stack align="center" gap="sm">
-                      <Text size="2.5rem" lh={1}>🎹</Text>
-                      <Text fw={600} size="lg" c="#1A1612">{t('repertoire.noPiecesTitle')}</Text>
-                      <Text c="dimmed" size="sm">
-                        <Trans
-                          i18nKey="repertoire.noPiecesDesc"
-                          components={{ bold: <strong /> }}
-                        />
-                      </Text>
-                    </Stack>
-                  </Center>
-                ) : (
-                  <Text c="dimmed" ta="center" py="xl">{t('repertoire.noMatchFilters')}</Text>
-                )}
-              </Table.Td>
-            </Table.Tr>
-          )}
-        </Table.Tbody>
-      </Table>
+              ),
+            },
+            {
+              accessor: 'last_played_at',
+              title: t('repertoire.colLastPlayed'),
+              sortable: true,
+              render: p => formatDate(p.last_played_at) ?? t('common.never'),
+            },
+          ]}
+        />
+      )}
     </Stack>
   )
 }

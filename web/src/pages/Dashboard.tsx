@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  Title, Text, SimpleGrid, Card, Table, Badge, Button,
+  Title, Text, SimpleGrid, Card, Badge, Button,
   Center, Stack, Anchor,
 } from '@mantine/core'
+import { DataTable, type DataTableSortStatus } from 'mantine-datatable'
 import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Piece } from '../api/types'
@@ -16,6 +17,10 @@ export default function Dashboard() {
   const { t } = useTranslation()
   const [stale, setStale] = useState<Piece[]>([])
   const [all, setAll] = useState<Piece[]>([])
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Piece>>({
+    columnAccessor: 'last_played_at',
+    direction: 'asc',
+  })
 
   useEffect(() => {
     api.pieces.list({ stale_days: 30 }).then(setStale)
@@ -23,6 +28,21 @@ export default function Dashboard() {
   }, [])
 
   const byStatus = (s: string) => all.filter(p => p.status === s).length
+
+  const sorted = useMemo(() => {
+    const { columnAccessor, direction } = sortStatus
+    return [...stale].sort((a, b) => {
+      let av: unknown = a[columnAccessor as keyof Piece]
+      let bv: unknown = b[columnAccessor as keyof Piece]
+      if (columnAccessor === 'composer') { av = a.composer?.name ?? ''; bv = b.composer?.name ?? '' }
+      if (av == null) return 1
+      if (bv == null) return -1
+      const cmp = typeof av === 'number' && typeof bv === 'number'
+        ? av - bv
+        : String(av).localeCompare(String(bv))
+      return direction === 'asc' ? cmp : -cmp
+    })
+  }, [stale, sortStatus])
 
   const STATUS_CARDS = [
     { status: 'wishlist', label: t('status.wishlist') },
@@ -37,7 +57,6 @@ export default function Dashboard() {
         {t('dashboard.welcome', { username: user?.username })}
       </Title>
 
-      {/* Status stat cards */}
       <SimpleGrid cols={4} spacing="md">
         {STATUS_CARDS.map(({ status, label }) => (
           <Card
@@ -52,27 +71,16 @@ export default function Dashboard() {
             }}
             onClick={() => navigate(`/repertoire?status=${status}`)}
           >
-            <Text
-              size="2.25rem"
-              fw={700}
-              c={`${statusColor(status)}.7`}
-              lh={1}
-            >
+            <Text size="2.25rem" fw={700} c={`${statusColor(status)}.7`} lh={1}>
               {byStatus(status)}
             </Text>
-            <Badge
-              mt="xs"
-              color={statusColor(status)}
-              variant="light"
-              radius="sm"
-            >
+            <Badge mt="xs" color={statusColor(status)} variant="light" radius="sm">
               {label}
             </Badge>
           </Card>
         ))}
       </SimpleGrid>
 
-      {/* Empty repertoire prompt */}
       {all.length === 0 && (
         <Card
           padding="xl"
@@ -93,7 +101,6 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* To Revisit */}
       <div>
         <Title order={2} mb="md" style={{ fontFamily: 'Playfair Display, serif' }}>
           {t('dashboard.toRevisitTitle')}{' '}
@@ -103,38 +110,51 @@ export default function Dashboard() {
         {stale.length === 0 ? (
           <Text c="dimmed" size="sm">{t('dashboard.allCaughtUp')}</Text>
         ) : (
-          <Table striped highlightOnHover withTableBorder withColumnBorders={false} verticalSpacing="sm">
-            <Table.Thead style={{ background: '#f5f5f5' }}>
-              <Table.Tr>
-                <Table.Th>{t('dashboard.colTitle')}</Table.Th>
-                <Table.Th>{t('dashboard.colComposer')}</Table.Th>
-                <Table.Th>{t('dashboard.colLastPlayed')}</Table.Th>
-                <Table.Th>{t('dashboard.colStatus')}</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {stale.map(p => (
-                <Table.Tr key={p.id}>
-                  <Table.Td>
-                    <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>
-                      {p.title}
-                    </Anchor>
-                  </Table.Td>
-                  <Table.Td c="dimmed">
-                    {p.composer
-                      ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
-                      : '—'}
-                  </Table.Td>
-                  <Table.Td>{formatDate(p.last_played_at) ?? t('common.never')}</Table.Td>
-                  <Table.Td>
-                    <Badge color={statusColor(p.status)} variant="light" radius="sm">
-                      {t(`status.${p.status}`)}
-                    </Badge>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+          <DataTable
+            striped
+            highlightOnHover
+            withTableBorder
+            verticalSpacing="sm"
+            records={sorted}
+            sortStatus={sortStatus}
+            onSortStatusChange={setSortStatus}
+            columns={[
+              {
+                accessor: 'title',
+                title: t('dashboard.colTitle'),
+                sortable: true,
+                render: p => (
+                  <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>
+                    {p.title}
+                  </Anchor>
+                ),
+              },
+              {
+                accessor: 'composer',
+                title: t('dashboard.colComposer'),
+                sortable: true,
+                render: p => p.composer
+                  ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
+                  : '—',
+              },
+              {
+                accessor: 'last_played_at',
+                title: t('dashboard.colLastPlayed'),
+                sortable: true,
+                render: p => formatDate(p.last_played_at) ?? t('common.never'),
+              },
+              {
+                accessor: 'status',
+                title: t('dashboard.colStatus'),
+                sortable: true,
+                render: p => (
+                  <Badge color={statusColor(p.status)} variant="light" radius="sm">
+                    {t(`status.${p.status}`)}
+                  </Badge>
+                ),
+              },
+            ]}
+          />
         )}
       </div>
     </Stack>

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
-  Title, Stack, Table, Badge, Text, Breadcrumbs, Anchor,
+  Title, Stack, Badge, Text, Breadcrumbs, Anchor,
   Group, SimpleGrid, Box,
 } from '@mantine/core'
+import { DataTable, type DataTableSortStatus } from 'mantine-datatable'
 import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Composer, Piece } from '../api/types'
@@ -14,12 +15,28 @@ export default function ComposerDetail() {
   const { t } = useTranslation()
   const [composer, setComposer] = useState<Composer | null>(null)
   const [pieces, setPieces] = useState<Piece[]>([])
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Piece>>({
+    columnAccessor: 'title',
+    direction: 'asc',
+  })
 
   useEffect(() => {
     const numId = Number(id)
     api.composers.get(numId).then(setComposer)
     api.pieces.list({ composer_id: numId }).then(setPieces)
   }, [id])
+
+  const sorted = useMemo(() => {
+    const { columnAccessor, direction } = sortStatus
+    return [...pieces].sort((a, b) => {
+      const av = a[columnAccessor as keyof Piece] ?? ''
+      const bv = b[columnAccessor as keyof Piece] ?? ''
+      const cmp = typeof av === 'number' && typeof bv === 'number'
+        ? av - bv
+        : String(av).localeCompare(String(bv))
+      return direction === 'asc' ? cmp : -cmp
+    })
+  }, [pieces, sortStatus])
 
   if (!composer) return <Text>{t('common.loading')}</Text>
 
@@ -62,30 +79,45 @@ export default function ComposerDetail() {
       {pieces.length > 0 && (
         <Box>
           <Title order={2} mb="sm" style={{ fontFamily: 'Playfair Display, serif' }}>{t('composerDetail.piecesTitle')}</Title>
-          <Table striped highlightOnHover withTableBorder verticalSpacing="sm">
-            <Table.Thead style={{ background: '#f5f5f5' }}>
-              <Table.Tr>
-                <Table.Th>{t('composerDetail.colTitle')}</Table.Th>
-                <Table.Th>{t('composerDetail.colDifficulty')}</Table.Th>
-                <Table.Th>{t('composerDetail.colStatus')}</Table.Th>
-                <Table.Th>{t('composerDetail.colLastPlayed')}</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {pieces.map(p => (
-                <Table.Tr key={p.id}>
-                  <Table.Td>
-                    <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>{p.title}</Anchor>
-                  </Table.Td>
-                  <Table.Td>{p.difficulty}/10</Table.Td>
-                  <Table.Td>
-                    <Badge color={statusColor(p.status)} variant="light" radius="sm">{t(`status.${p.status}`)}</Badge>
-                  </Table.Td>
-                  <Table.Td>{formatDate(p.last_played_at) ?? t('common.never')}</Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+          <DataTable
+            striped
+            highlightOnHover
+            withTableBorder
+            verticalSpacing="sm"
+            records={sorted}
+            sortStatus={sortStatus}
+            onSortStatusChange={setSortStatus}
+            columns={[
+              {
+                accessor: 'title',
+                title: t('composerDetail.colTitle'),
+                sortable: true,
+                render: p => (
+                  <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>{p.title}</Anchor>
+                ),
+              },
+              {
+                accessor: 'difficulty',
+                title: t('composerDetail.colDifficulty'),
+                sortable: true,
+                render: p => `${p.difficulty}/10`,
+              },
+              {
+                accessor: 'status',
+                title: t('composerDetail.colStatus'),
+                sortable: true,
+                render: p => (
+                  <Badge color={statusColor(p.status)} variant="light" radius="sm">{t(`status.${p.status}`)}</Badge>
+                ),
+              },
+              {
+                accessor: 'last_played_at',
+                title: t('composerDetail.colLastPlayed'),
+                sortable: true,
+                render: p => formatDate(p.last_played_at) ?? t('common.never'),
+              },
+            ]}
+          />
         </Box>
       )}
 
