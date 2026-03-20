@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { Paper, Title, TextInput, PasswordInput, Button, Text, Anchor, Stack, Alert } from '@mantine/core'
 import { authApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
@@ -9,49 +10,69 @@ export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
+    setLoading(true)
     try {
       const res = await authApi.login(username, password)
       login(res.token, res.user)
       navigate('/')
     } catch {
       setError('Invalid username or password')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: '6rem auto', padding: '2.5rem', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
-      <h2 style={{ marginBottom: '2rem', textAlign: 'center' }}>Sign in to Pianoter</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: 4 }}>Username</label>
-          <input
+    <Paper
+      w={420}
+      mx="auto"
+      mt={80}
+      p="xl"
+      radius="lg"
+      shadow="sm"
+      style={{ border: '1px solid var(--app-border)' }}
+    >
+      <Title order={2} ta="center" mb="xl" style={{ fontFamily: 'Playfair Display, serif' }}>
+        Sign in to Pianoter
+      </Title>
+
+      <form onSubmit={handleSubmit}>
+        <Stack gap="md">
+          <TextInput
+            label="Username"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
             autoFocus
-            style={{ width: '100%', padding: '0.5rem', boxSizing: 'border-box' }}
           />
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: 4 }}>Password</label>
-          <input
-            type="password"
+          <PasswordInput
+            label="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
-            style={{ width: '100%', padding: '0.5rem', boxSizing: 'border-box' }}
           />
-        </div>
-        {error && <p style={{ color: 'red', margin: 0 }}>{error}</p>}
-        <button type="submit" style={{ padding: '0.6rem', cursor: 'pointer', background: '#3182ce', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, fontSize: '1rem' }}>Sign in</button>
+          {error && (
+            <Alert color="red" variant="light" radius="md">
+              {error}
+            </Alert>
+          )}
+          <Button type="submit" fullWidth loading={loading} mt="xs">
+            Sign in
+          </Button>
+        </Stack>
       </form>
-      <p style={{ marginTop: '1rem', textAlign: 'center' }}>
-        No account? <Link to="/register">Register</Link>
-      </p>
-    </div>
+
+      <Text ta="center" mt="md" size="sm" c="dimmed">
+        No account?{' '}
+        <Anchor component={Link} to="/register" c="terracotta">
+          Register
+        </Anchor>
+      </Text>
+    </Paper>
   )
 }

@@ -1,17 +1,29 @@
 import { render, type RenderOptions } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MantineProvider } from '@mantine/core'
 import { AuthProvider } from './context/AuthContext'
+import { theme } from './theme'
 
-/** Renders inside MemoryRouter + AuthProvider (no route params). */
+function AllProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <MantineProvider theme={theme}>
+      {children}
+    </MantineProvider>
+  )
+}
+
+/** Renders inside MantineProvider + MemoryRouter + AuthProvider (no route params). */
 export function renderWithProviders(
   ui: React.ReactElement,
   options: RenderOptions = {},
 ) {
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
-      <MemoryRouter>
-        <AuthProvider>{children}</AuthProvider>
-      </MemoryRouter>
+      <AllProviders>
+        <MemoryRouter>
+          <AuthProvider>{children}</AuthProvider>
+        </MemoryRouter>
+      </AllProviders>
     )
   }
   return render(ui, { wrapper: Wrapper, ...options })
@@ -20,10 +32,6 @@ export function renderWithProviders(
 /**
  * Renders inside a real Routes/Route context so useParams works.
  * Use this for any component that calls useParams() or useNavigate().
- *
- * @param routePath  The route pattern, e.g. "/pieces/:id"
- * @param component  The component to render
- * @param initialEntry  The URL to start at, e.g. "/pieces/7"
  */
 export function renderWithRoute(
   routePath: string,
@@ -32,13 +40,15 @@ export function renderWithRoute(
   options: RenderOptions = {},
 ) {
   return render(
-    <MemoryRouter initialEntries={[initialEntry]}>
-      <AuthProvider>
-        <Routes>
-          <Route path={routePath} element={component} />
-        </Routes>
-      </AuthProvider>
-    </MemoryRouter>,
+    <AllProviders>
+      <MemoryRouter initialEntries={[initialEntry]}>
+        <AuthProvider>
+          <Routes>
+            <Route path={routePath} element={component} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    </AllProviders>,
     options,
   )
 }
