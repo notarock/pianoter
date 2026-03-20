@@ -101,7 +101,7 @@ export default function Dashboard() {
         </Card>
       )}
 
-      <div>
+      {all.length > 0 && <div>
         <Title order={2} mb="md" style={{ fontFamily: 'Playfair Display, serif' }}>
           {t('dashboard.toRevisitTitle')}{' '}
           <Text span size="sm" c="dimmed" fw={400}>{t('dashboard.toRevisitSub')}</Text>
@@ -156,7 +156,7 @@ export default function Dashboard() {
             ]}
           />
         )}
-      </div>
+      </div>}
     </Stack>
   )
 }

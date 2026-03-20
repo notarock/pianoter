@@ -73,11 +73,17 @@ describe('Dashboard page', () => {
   })
 
   it('renders the "to revisit" section heading', async () => {
+    vi.mocked(client.api.pieces.list)
+      .mockResolvedValueOnce([])          // stale call
+      .mockResolvedValueOnce([makePiece()]) // all call
     renderWithProviders(<Dashboard />)
     expect(await screen.findByText(/to revisit/i)).toBeInTheDocument()
   })
 
   it('shows "all caught up" when no stale pieces', async () => {
+    vi.mocked(client.api.pieces.list)
+      .mockResolvedValueOnce([])          // stale call
+      .mockResolvedValueOnce([makePiece()]) // all call
     renderWithProviders(<Dashboard />)
     expect(await screen.findByText(/all caught up/i)).toBeInTheDocument()
   })
