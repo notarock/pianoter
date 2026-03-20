@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   Title, Group, Button, Table, Badge, Text,
-  Checkbox, TextInput, NativeSelect, Stack, Center,
+  Checkbox, TextInput, NativeSelect, Stack, Center, Tooltip,
 } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import { api } from '../api/client'
@@ -114,7 +114,9 @@ export default function Composers() {
                 <Group gap="xs">
                   {c.name}
                   {c.user_id === 0 && (
-                    <Badge size="xs" color="blue" variant="light">system</Badge>
+                    <Tooltip label="Built-in composer, shared across all users" withArrow>
+                      <Badge size="xs" color="blue" variant="light">system</Badge>
+                    </Tooltip>
                   )}
                 </Group>
               </Table.Td>
