@@ -134,7 +134,7 @@ func TestPieceList_StaleDaysFilter(t *testing.T) {
 	freshPiece := models.Piece{UserID: 1, Title: "Fresh Piece", Status: "active", LastPlayedAt: &now}
 	h.DB.Create(&freshPiece)
 
-	// pieces not played at all (stale)
+	// piece never played — should NOT appear in stale results
 	h.DB.Create(&models.Piece{UserID: 1, Title: "Never Played", Status: "active"})
 
 	req := httptest.NewRequest(http.MethodGet, "/pieces?stale_days=7", nil)
@@ -145,14 +145,12 @@ func TestPieceList_StaleDaysFilter(t *testing.T) {
 	if err := json.NewDecoder(rr.Body).Decode(&pieces); err != nil {
 		t.Fatalf("failed to decode: %v", err)
 	}
-	// Should return stalePiece and neverPlayed, not freshPiece
-	if len(pieces) != 2 {
-		t.Errorf("expected 2 stale pieces, got %d", len(pieces))
+	// Should return only stalePiece; fresh and never-played are excluded
+	if len(pieces) != 1 {
+		t.Errorf("expected 1 stale piece, got %d", len(pieces))
 	}
-	for _, p := range pieces {
-		if p["title"] == "Fresh Piece" {
-			t.Error("fresh piece should not be included in stale results")
-		}
+	if len(pieces) > 0 && pieces[0]["title"] != "Stale Piece" {
+		t.Errorf("expected 'Stale Piece', got %v", pieces[0]["title"])
 	}
 }
 

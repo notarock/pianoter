@@ -23,9 +23,7 @@ export default function Dashboard() {
   const [all, setAll] = useState<Piece[]>([])
 
   useEffect(() => {
-    api.pieces.list({ stale_days: 30 }).then(pieces =>
-      setStale(pieces.filter(p => p.last_played_at !== null))
-    )
+    api.pieces.list({ stale_days: 30 }).then(setStale)
     api.pieces.list().then(setAll)
   }, [])
 

@@ -30,7 +30,7 @@ func (h *PieceHandler) List(w http.ResponseWriter, r *http.Request) {
 		days, err := strconv.Atoi(staleDays)
 		if err == nil {
 			cutoff := time.Now().AddDate(0, 0, -days)
-			q = q.Where("last_played_at IS NULL OR last_played_at < ?", cutoff)
+			q = q.Where("last_played_at IS NOT NULL AND last_played_at < ?", cutoff)
 		}
 	}
 
