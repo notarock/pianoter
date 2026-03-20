@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Title, Text, SimpleGrid, Card, Badge, Button,
-  Center, Stack, Anchor,
+  Center, Stack, Anchor, SegmentedControl, Group,
 } from '@mantine/core'
 import { DataTable, type DataTableSortStatus } from 'mantine-datatable'
 import { useTranslation } from 'react-i18next'
@@ -17,13 +17,17 @@ export default function Dashboard() {
   const { t } = useTranslation()
   const [stale, setStale] = useState<Piece[]>([])
   const [all, setAll] = useState<Piece[]>([])
+  const [staleDays, setStaleDays] = useState(30)
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Piece>>({
     columnAccessor: 'last_played_at',
     direction: 'asc',
   })
 
   useEffect(() => {
-    api.pieces.list({ stale_days: 30 }).then(setStale)
+    api.pieces.list({ stale_days: staleDays }).then(setStale)
+  }, [staleDays])
+
+  useEffect(() => {
     api.pieces.list().then(setAll)
   }, [])
 
@@ -102,10 +106,23 @@ export default function Dashboard() {
       )}
 
       {all.length > 0 && <div>
-        <Title order={2} mb="md" style={{ fontFamily: 'Playfair Display, serif' }}>
-          {t('dashboard.toRevisitTitle')}{' '}
-          <Text span size="sm" c="dimmed" fw={400}>{t('dashboard.toRevisitSub')}</Text>
-        </Title>
+        <Group justify="space-between" align="center" mb="md">
+          <Title order={2} style={{ fontFamily: 'Playfair Display, serif' }}>
+            {t('dashboard.toRevisitTitle')}{' '}
+            <Text span size="sm" c="dimmed" fw={400}>{t('dashboard.toRevisitSub')}</Text>
+          </Title>
+          <SegmentedControl
+            size="xs"
+            value={String(staleDays)}
+            onChange={v => setStaleDays(Number(v))}
+            data={[
+              { label: t('dashboard.days', { count: 7 }),  value: '7'  },
+              { label: t('dashboard.days', { count: 14 }), value: '14' },
+              { label: t('dashboard.days', { count: 30 }), value: '30' },
+              { label: t('dashboard.days', { count: 60 }), value: '60' },
+            ]}
+          />
+        </Group>
 
         {stale.length === 0 ? (
           <Text c="dimmed" size="sm">{t('dashboard.allCaughtUp')}</Text>
