@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   Title, Group, Button, Badge, Stack, Table,
-  Text, Textarea, NativeSelect, Box, Timeline, Breadcrumbs, Anchor,
+  Text, Textarea, NativeSelect, Box, Timeline, Breadcrumbs, Anchor, Progress,
 } from '@mantine/core'
 import { api } from '../api/client'
 import { PLAYING_LEVELS } from '../api/types'
@@ -88,7 +88,17 @@ export default function PieceDetail() {
           </Table.Tr>
           <Table.Tr>
             <Table.Td c="dimmed" pr="xl">Difficulty</Table.Td>
-            <Table.Td>{piece.difficulty}/10</Table.Td>
+            <Table.Td>
+              <Group gap="sm" align="center">
+                <Progress
+                  value={piece.difficulty * 10}
+                  color="terracotta"
+                  size="sm"
+                  w={80}
+                />
+                <Text size="sm">{piece.difficulty}/10</Text>
+              </Group>
+            </Table.Td>
           </Table.Tr>
           <Table.Tr>
             <Table.Td c="dimmed" pr="xl">Status</Table.Td>

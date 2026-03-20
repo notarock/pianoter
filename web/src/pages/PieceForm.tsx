@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  Title, Stack, TextInput, NativeSelect, NumberInput,
-  Button, Group, Paper,
+  Title, Stack, TextInput, NativeSelect,
+  Button, Group, Paper, Slider, Text,
 } from '@mantine/core'
 import { api } from '../api/client'
 import type { Composer, Piece } from '../api/types'
@@ -15,7 +15,7 @@ export default function PieceForm() {
   const [composers, setComposers] = useState<Composer[]>([])
   const [title, setTitle] = useState('')
   const [composerId, setComposerId] = useState('')
-  const [difficulty, setDifficulty] = useState<number | string>(5)
+  const [difficulty, setDifficulty] = useState(5)
   const [status, setStatus] = useState('wishlist')
   const [startedAt, setStartedAt] = useState('')
 
@@ -25,7 +25,7 @@ export default function PieceForm() {
       api.pieces.get(Number(id)).then(p => {
         setTitle(p.title)
         setComposerId(String(p.composer_id))
-        setDifficulty(p.difficulty)
+        setDifficulty(p.difficulty ?? 5)
         setStatus(p.status)
         setStartedAt(p.started_at ? p.started_at.slice(0, 10) : '')
       })
@@ -37,7 +37,7 @@ export default function PieceForm() {
     const data = {
       title,
       composer_id: Number(composerId),
-      difficulty: Number(difficulty),
+      difficulty,
       status: status as Piece['status'],
       started_at: startedAt ? new Date(startedAt).toISOString() : null,
     }
@@ -75,13 +75,19 @@ export default function PieceForm() {
             onChange={e => setComposerId(e.target.value)}
             data={composerOptions}
           />
-          <NumberInput
-            label="Difficulty (1–10)"
-            min={1}
-            max={10}
-            value={difficulty}
-            onChange={setDifficulty}
-          />
+          <div>
+            <Text size="sm" fw={500} mb={6}>Difficulty — {difficulty}/10</Text>
+            <Slider
+              aria-label="Difficulty (1–10)"
+              min={1}
+              max={10}
+              value={difficulty}
+              onChange={setDifficulty}
+              marks={[1,3,5,7,10].map(v => ({ value: v, label: String(v) }))}
+              color="terracotta"
+              mb="md"
+            />
+          </div>
           <NativeSelect
             label="Status"
             value={status}
