@@ -2,7 +2,7 @@
 
 dev:
 	@echo "Starting backend and frontend..."
-	@(trap 'kill 0' INT; \
+	@(trap 'kill 0' INT TERM EXIT; \
 	  go run . & \
 	  cd web && npm run dev)
 
