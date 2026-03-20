@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
-import { AppShell, Group, Text, Anchor, Box, SegmentedControl } from '@mantine/core'
+import { AppShell, Group, Text, Anchor, Box, SegmentedControl, Stack } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import Dashboard from './pages/Dashboard'
 import Repertoire from './pages/Repertoire'
@@ -28,26 +28,94 @@ function Nav() {
         borderBottom: '1px solid var(--app-border)',
       }}
     >
-      <Group h="100%" px="xl" justify="space-between">
-        {/* Brand */}
-        <Group gap="xs">
-          <Text span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🎹</Text>
-          <Text
-            fw={700}
-            style={{
-              fontFamily: 'Playfair Display, serif',
-              fontSize: '1.15rem',
-              color: '#1A1612',
-              letterSpacing: '-0.01em',
-            }}
-          >
-            Pianoter
-          </Text>
+      <Stack gap={0} h="100%" justify="center">
+        {/* Top row: brand + controls */}
+        <Group px="xl" justify="space-between" wrap="nowrap" h={56}>
+          {/* Brand */}
+          <Group gap="xs">
+            <Text span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🎹</Text>
+            <Text
+              fw={700}
+              style={{
+                fontFamily: 'Playfair Display, serif',
+                fontSize: '1.15rem',
+                color: '#1A1612',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Pianoter
+            </Text>
+          </Group>
+
+          {/* Desktop nav links (hidden on mobile) */}
+          {token && (
+            <Group gap="xl" visibleFrom="sm">
+              {[
+                { to: '/', label: t('nav.dashboard'), end: true },
+                { to: '/repertoire', label: t('nav.repertoire') },
+                { to: '/composers', label: t('nav.composers') },
+              ].map(({ to, label, end }) => (
+                <NavLink key={to} to={to} end={end} style={{ textDecoration: 'none' }}>
+                  {({ isActive }) => (
+                    <Text
+                      component="span"
+                      fw={isActive ? 600 : 400}
+                      style={{
+                        color: isActive ? 'var(--mantine-color-gray-9)' : '#6B6560',
+                        borderBottom: isActive
+                          ? '2px solid var(--mantine-color-gray-9)'
+                          : '2px solid transparent',
+                        paddingBottom: 2,
+                        fontSize: '0.9375rem',
+                        textDecoration: 'none',
+                        transition: 'color 150ms ease',
+                      }}
+                    >
+                      {label}
+                    </Text>
+                  )}
+                </NavLink>
+              ))}
+            </Group>
+          )}
+
+          {/* Language switcher + user + logout */}
+          <Group gap="md" wrap="nowrap">
+            <SegmentedControl
+              size="xs"
+              value={i18n.resolvedLanguage === 'fr' ? 'fr' : 'en'}
+              onChange={lang => i18n.changeLanguage(lang)}
+              data={[
+                { label: 'EN', value: 'en' },
+                { label: 'FR', value: 'fr' },
+              ]}
+            />
+            {user && (
+              <>
+                <Text size="sm" c="dimmed" visibleFrom="sm">{user.username}</Text>
+                <Anchor
+                  component="button"
+                  onClick={logout}
+                  size="sm"
+                  c="dimmed"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  {t('nav.logout')}
+                </Anchor>
+              </>
+            )}
+          </Group>
         </Group>
 
-        {/* Nav links */}
+        {/* Mobile nav links (hidden on desktop) */}
         {token && (
-          <Group gap="xl">
+          <Group
+            hiddenFrom="sm"
+            gap={0}
+            px="xl"
+            h={40}
+            style={{ borderTop: '1px solid var(--app-border)' }}
+          >
             {[
               { to: '/', label: t('nav.dashboard'), end: true },
               { to: '/repertoire', label: t('nav.repertoire') },
@@ -58,15 +126,17 @@ function Nav() {
                   <Text
                     component="span"
                     fw={isActive ? 600 : 400}
+                    px="md"
                     style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      height: 40,
                       color: isActive ? 'var(--mantine-color-gray-9)' : '#6B6560',
                       borderBottom: isActive
                         ? '2px solid var(--mantine-color-gray-9)'
                         : '2px solid transparent',
-                      paddingBottom: 2,
-                      fontSize: '0.9375rem',
+                      fontSize: '0.875rem',
                       textDecoration: 'none',
-                      transition: 'color 150ms ease',
                     }}
                   >
                     {label}
@@ -76,34 +146,7 @@ function Nav() {
             ))}
           </Group>
         )}
-
-        {/* Language switcher + user + logout */}
-        <Group gap="md">
-          <SegmentedControl
-            size="xs"
-            value={i18n.resolvedLanguage === 'fr' ? 'fr' : 'en'}
-            onChange={lang => i18n.changeLanguage(lang)}
-            data={[
-              { label: 'EN', value: 'en' },
-              { label: 'FR', value: 'fr' },
-            ]}
-          />
-          {user && (
-            <>
-              <Text size="sm" c="dimmed">{user.username}</Text>
-              <Anchor
-                component="button"
-                onClick={logout}
-                size="sm"
-                c="dimmed"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-              >
-                {t('nav.logout')}
-              </Anchor>
-            </>
-          )}
-        </Group>
-      </Group>
+      </Stack>
     </AppShell.Header>
   )
 }
@@ -112,7 +155,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppShell header={{ height: 56 }} bg="var(--app-bg)">
+        <AppShell header={{ height: { base: 96, sm: 56 } }} bg="var(--app-bg)">
           <Nav />
           <AppShell.Main>
             <Box maw={960} mx="auto" px="xl" py="xl">
