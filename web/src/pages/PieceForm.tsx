@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   Title, Stack, TextInput, NativeSelect, Textarea,
-  Button, Group, Paper, Slider, Text,
+  Button, Group, Paper, Slider, Text, Modal, ActionIcon, Tooltip,
 } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import { DatePickerInput } from '@mantine/dates'
 import { api } from '../api/client'
 import type { Composer, Piece } from '../api/types'
+import { COMPOSER_NATIONALITIES } from '../api/types'
 
 export default function PieceForm() {
   const { id } = useParams<{ id: string }>()
@@ -23,8 +25,15 @@ export default function PieceForm() {
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<{ title?: string; composer?: string }>({})
 
+  // Quick-add composer modal
+  const [composerModalOpened, { open: openComposerModal, close: closeComposerModal }] = useDisclosure(false)
+  const [newComposerName, setNewComposerName] = useState('')
+  const [newComposerNationality, setNewComposerNationality] = useState('')
+
+  const loadComposers = () => api.composers.list().then(setComposers)
+
   useEffect(() => {
-    api.composers.list().then(setComposers)
+    loadComposers()
     if (isEdit) {
       api.pieces.get(Number(id)).then(p => {
         setTitle(p.title)
@@ -63,6 +72,21 @@ export default function PieceForm() {
     }
   }
 
+  const addComposer = async () => {
+    if (!newComposerName.trim()) return
+    const c = await api.composers.create({
+      name: newComposerName.trim(),
+      nationality: newComposerNationality as Composer['nationality'],
+    })
+    notifications.show({ message: `${c.name} added`, color: 'teal' })
+    await loadComposers()
+    setComposerId(String(c.id))
+    setErrors(v => ({ ...v, composer: undefined }))
+    setNewComposerName('')
+    setNewComposerNationality('')
+    closeComposerModal()
+  }
+
   const composerOptions = [
     { value: '', label: 'Select a composer' },
     ...composers.map(c => ({ value: String(c.id), label: c.name })),
@@ -82,14 +106,30 @@ export default function PieceForm() {
             onChange={e => { setTitle(e.target.value); setErrors(v => ({ ...v, title: undefined })) }}
             error={errors.title}
           />
-          <NativeSelect
-            label="Composer"
-            required
-            value={composerId}
-            onChange={e => { setComposerId(e.target.value); setErrors(v => ({ ...v, composer: undefined })) }}
-            data={composerOptions}
-            error={errors.composer}
-          />
+          <div>
+            <Group gap="xs" align="flex-end">
+              <NativeSelect
+                label="Composer"
+                required
+                value={composerId}
+                onChange={e => { setComposerId(e.target.value); setErrors(v => ({ ...v, composer: undefined })) }}
+                data={composerOptions}
+                error={errors.composer}
+                style={{ flex: 1 }}
+              />
+              <Tooltip label="Add a new composer" withArrow>
+                <ActionIcon
+                  variant="default"
+                  size="lg"
+                  mb={errors.composer ? 20 : 0}
+                  onClick={openComposerModal}
+                  aria-label="Add new"
+                >
+                  +
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+          </div>
           <div>
             <Text size="sm" fw={500} mb={6}>Difficulty — {difficulty}/10</Text>
             <Slider
@@ -140,6 +180,38 @@ export default function PieceForm() {
           </Group>
         </Stack>
       </form>
+
+      {/* Quick-add composer modal */}
+      <Modal
+        opened={composerModalOpened}
+        onClose={closeComposerModal}
+        title="Add Composer"
+        centered
+        size="sm"
+      >
+        <Stack gap="md">
+          <TextInput
+            label="Name"
+            required
+            placeholder="e.g. Johann Sebastian Bach"
+            value={newComposerName}
+            onChange={e => setNewComposerName(e.target.value)}
+          />
+          <NativeSelect
+            label="Nationality"
+            value={newComposerNationality}
+            onChange={e => setNewComposerNationality(e.target.value)}
+            data={[
+              { value: '', label: 'Select nationality (optional)' },
+              ...COMPOSER_NATIONALITIES.map(n => ({ value: n, label: n })),
+            ]}
+          />
+          <Group justify="flex-end">
+            <Button variant="default" onClick={closeComposerModal}>Cancel</Button>
+            <Button onClick={addComposer} disabled={!newComposerName.trim()}>Add Composer</Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Paper>
   )
 }
