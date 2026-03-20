@@ -21,6 +21,7 @@ export default function Composers() {
   const [diedYear, setDiedYear] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [hideSystem, setHideSystem] = useState(false)
+  const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Composer>>({
     columnAccessor: 'name',
@@ -30,7 +31,7 @@ export default function Composers() {
   const load = () => api.composers.list().then(setComposers)
 
   useEffect(() => { load() }, [])
-  useEffect(() => { setPage(1) }, [hideSystem, sortStatus])
+  useEffect(() => { setPage(1) }, [hideSystem, search, sortStatus])
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,8 +51,11 @@ export default function Composers() {
   }
 
   const filtered = useMemo(() =>
-    composers.filter(c => !hideSystem || c.user_id !== 0),
-    [composers, hideSystem])
+    composers.filter(c =>
+      (!hideSystem || c.user_id !== 0) &&
+      (!search || c.name.toLowerCase().includes(search.toLowerCase()))
+    ),
+    [composers, hideSystem, search])
 
   const sorted = useMemo(() => {
     const { columnAccessor, direction } = sortStatus
@@ -74,6 +78,12 @@ export default function Composers() {
       <Group justify="space-between" align="center">
         <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{t('composers.title')}</Title>
         <Group gap="md" align="center">
+          <TextInput
+            placeholder={t('composers.searchPlaceholder')}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            w={200}
+          />
           <Checkbox
             label={t('composers.hideSystem')}
             checked={hideSystem}

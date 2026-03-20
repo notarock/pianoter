@@ -148,6 +148,7 @@ const en = {
     systemBadge: 'system',
     systemTooltip: 'Built-in composer, shared across all users',
     deleteBtn: 'Delete',
+    searchPlaceholder: 'Search composers…',
     noComposers: 'No composers yet.',
     notifAdded: 'Composer added',
   },

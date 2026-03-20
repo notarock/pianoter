@@ -148,6 +148,7 @@ const fr = {
     systemBadge: 'système',
     systemTooltip: 'Compositeur intégré, partagé entre tous les utilisateurs',
     deleteBtn: 'Supprimer',
+    searchPlaceholder: 'Rechercher un compositeur…',
     noComposers: 'Aucun compositeur.',
     notifAdded: 'Compositeur ajouté',
   },
