@@ -5,6 +5,22 @@ import { renderWithProviders, setAuthState, clearAuthState } from '../test-utils
 import * as client from '../api/client'
 import type { Piece } from '../api/types'
 
+vi.mock('mantine-datatable', () => ({
+  DataTable: ({ records, columns, noRecordsText }: any) => {
+    if (!records?.length) return <p>{noRecordsText ?? 'No records'}</p>
+    return (
+      <table>
+        <thead><tr>{columns.map((c: any) => <th key={c.accessor}>{c.title}</th>)}</tr></thead>
+        <tbody>{records.map((r: any) => (
+          <tr key={r.id}>{columns.map((c: any) => (
+            <td key={c.accessor}>{c.render ? c.render(r) : String(r[c.accessor] ?? '')}</td>
+          ))}</tr>
+        ))}</tbody>
+      </table>
+    )
+  },
+}))
+
 vi.mock('../api/client', () => ({
   authApi: {},
   api: {
