@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+# Pianoter — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript frontend for Pianoter, built with Vite.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [React](https://react.dev) 19 with TypeScript
+- [Vite](https://vitejs.dev) for building and dev server
+- [Mantine](https://mantine.dev) for UI components
+- [mantine-datatable](https://icflorescu.github.io/mantine-datatable/) for the sortable tables
+- [react-router-dom](https://reactrouter.com) v7 for routing
+- [i18next](https://www.i18next.com) + react-i18next for EN / FR translations
 
-## React Compiler
+## Dev
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Runs on port `5173`. API calls to `/api` get proxied to the backend at `localhost:8080`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Build
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
+```
+
+Output goes to `dist/`. In Docker, Nginx serves the built assets and proxies API requests.
+
+## Tests
+
+```bash
+npm test          # unit tests with vitest
+npm run cy:run    # Cypress e2e headless
+npm run cy:open   # Cypress e2e interactive
+```
+
+## Project structure
+
+```
+src/
+  api/          # typed API client and request helpers
+  context/      # AuthContext (JWT, user state)
+  pages/        # one file per route (Dashboard, Repertoire, PieceDetail, …)
+  locales/      # en.json and fr.json
+  utils.ts      # shared helpers (date formatting, status colors, etc.)
+  App.tsx        # router, nav shell, protected routes
+  main.tsx       # entry point
 ```

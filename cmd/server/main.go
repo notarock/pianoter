@@ -35,6 +35,15 @@ func Run() {
 	sessions := &handlers.SessionHandler{DB: database}
 
 	r := chi.NewRouter()
+
+	applyMiddleware(r)
+	registerRoutes(r, cfg.JWTSecret, auth, composers, pieces, sessions)
+
+	log.Printf("Listening on :%s", cfg.Port)
+	log.Fatal(http.ListenAndServe(":"+cfg.Port, r))
+}
+
+func applyMiddleware(r *chi.Mux) {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(func(next http.Handler) http.Handler {
@@ -49,7 +58,9 @@ func Run() {
 			next.ServeHTTP(w, r)
 		})
 	})
+}
 
+func registerRoutes(r *chi.Mux, jwtSecret string, auth *handlers.AuthHandler, composers *handlers.ComposerHandler, pieces *handlers.PieceHandler, sessions *handlers.SessionHandler) {
 	r.Route("/api", func(r chi.Router) {
 		// Public auth routes
 		r.Post("/auth/register", auth.Register)
@@ -57,7 +68,7 @@ func Run() {
 
 		// Protected routes
 		r.Group(func(r chi.Router) {
-			r.Use(authmw.Authenticate(cfg.JWTSecret))
+			r.Use(authmw.Authenticate(jwtSecret))
 
 			r.Get("/composers", composers.List)
 			r.Post("/composers", composers.Create)
@@ -75,9 +86,6 @@ func Run() {
 			r.Get("/pieces/{id}/sessions", sessions.List)
 		})
 	})
-
-	log.Printf("Listening on :%s", cfg.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, r))
 }
 
 func RunMigrate(args []string) {
