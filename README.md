@@ -21,7 +21,7 @@ A practice tracker I built for myself to manage my piano repertoire. Keeps track
 - Track progression through stages (hands separate → performance ready)
 - Timeline showing how long each stage took
 - Dashboard with piece counts and a "to revisit" table (7 / 14 / 30 / 60 days)
-- 50 pre-seeded classical composers with per-composer listings and search
+- 50+ pre-seeded classical composers with per-composer listings and search
 - English and French UI with a language switcher in the nav
 - Works on mobile too
 
