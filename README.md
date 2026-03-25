@@ -1,6 +1,17 @@
 # Pianoter
 
 A practice tracker I built for myself to manage my piano repertoire. Keeps track of what I'm working on, logs sessions, and shows how long it takes to get through each learning stage.
+  
+<img width="835" height="869" alt="image" src="https://github.com/user-attachments/assets/a168261b-a7be-4a54-816f-6dc3af024909" />
+
+<details> 
+<summary>Mode Screenshots</summary>
+
+  <img width="931" height="1146" alt="image" src="https://github.com/user-attachments/assets/38145908-75c2-4bce-a3d4-ef1d9efb6e48" />
+
+  <img width="931" height="1146" alt="image" src="https://github.com/user-attachments/assets/224296f8-79f1-441b-9d2c-b1851e4305e3" />
+
+</details>
 
 ## What it does
 
@@ -13,6 +24,7 @@ A practice tracker I built for myself to manage my piano repertoire. Keeps track
 - 50 pre-seeded classical composers with per-composer listings and search
 - English and French UI with a language switcher in the nav
 - Works on mobile too
+
 
 ## Stack
 
