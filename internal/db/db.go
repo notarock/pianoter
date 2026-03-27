@@ -19,4 +19,3 @@ func New(dsn string) (*gorm.DB, error) {
 	}
 	return db, nil
 }
-
