@@ -34,7 +34,7 @@ function Nav() {
         <Group px="xl" justify="space-between" wrap="nowrap" h={56}>
           {/* Brand */}
           <Group gap="xs">
-            <Text span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🎹</Text>
+            <Text span style={{ fontSize: '1.4rem', lineHeight: 1 }}>P</Text>
             <Text
               fw={700}
               style={{
