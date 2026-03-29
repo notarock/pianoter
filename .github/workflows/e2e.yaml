@@ -59,11 +59,21 @@ jobs:
           done
 
       # --- Cypress ---
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: web
+
+      - name: Start frontend dev server
+        run: npm run dev &
+        working-directory: web
+
+      - name: Wait for frontend
+        run: npx wait-on http://localhost:5174 --timeout 60000
+        working-directory: web
+
       - name: Run Cypress E2E tests
         uses: cypress-io/github-action@v6
         with:
           working-directory: web
-          start: npm run dev
-          wait-on: http://localhost:5174
-          wait-on-timeout: 60
+          install: false
           browser: chrome
