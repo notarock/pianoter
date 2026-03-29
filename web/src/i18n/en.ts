@@ -73,6 +73,7 @@ const en = {
     noPiecesTitle: 'No pieces yet',
     noPiecesDesc: 'Use the <bold>+ Add Piece</bold> button above to get started.',
     noMatchFilters: 'No pieces match your filters.',
+    addFirstPiece: 'Add your first piece',
   },
   pieceForm: {
     addTitle: 'Add Piece',

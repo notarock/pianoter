@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
-  Title, Group, Button, Select, Badge,
+  Title, Group, Button, NativeSelect, Badge,
   Anchor, Text, Center, Stack, TextInput,
 } from '@mantine/core'
 import { DataTable, type DataTableSortStatus } from 'mantine-datatable'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
 import type { Piece, Composer } from '../api/types'
 import { statusColor, formatDate } from '../utils'
@@ -14,10 +14,11 @@ const PAGE_SIZE = 20
 
 export default function Repertoire() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [pieces, setPieces] = useState<Piece[]>([])
   const [composers, setComposers] = useState<Composer[]>([])
-  const [status, setStatus] = useState<string | null>(null)
-  const [composerId, setComposerId] = useState<string | null>(null)
+  const [status, setStatus] = useState('')
+  const [composerId, setComposerId] = useState('')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Piece>>({
@@ -73,12 +74,11 @@ export default function Repertoire() {
       </Group>
 
       <Group gap="sm" wrap="wrap">
-        <Select
-          placeholder={t('repertoire.allStatuses')}
+        <NativeSelect
           value={status}
-          onChange={setStatus}
-          clearable
+          onChange={e => setStatus(e.target.value)}
           data={[
+            { value: '', label: t('repertoire.allStatuses') },
             { value: 'wishlist', label: t('status.wishlist') },
             { value: 'learning', label: t('status.learning') },
             { value: 'active',   label: t('status.active')   },
@@ -86,13 +86,13 @@ export default function Repertoire() {
           ]}
           w={160}
         />
-        <Select
-          placeholder={t('repertoire.allComposers')}
+        <NativeSelect
           value={composerId}
-          onChange={setComposerId}
-          clearable
-          searchable
-          data={composerOptions}
+          onChange={e => setComposerId(e.target.value)}
+          data={[
+            { value: '', label: t('repertoire.allComposers') },
+            ...composerOptions,
+          ]}
           w={220}
         />
         <TextInput
@@ -103,18 +103,7 @@ export default function Repertoire() {
         />
       </Group>
 
-      {pieces.length === 0 && !status && !composerId && !search ? (
-        <Center py={48}>
-          <Stack align="center" gap="sm">
-            <Text size="2.5rem" lh={1}>🎹</Text>
-            <Text fw={600} size="lg" c="#1A1612">{t('repertoire.noPiecesTitle')}</Text>
-            <Text c="dimmed" size="sm">
-              <Trans i18nKey="repertoire.noPiecesDesc" components={{ bold: <strong /> }} />
-            </Text>
-          </Stack>
-        </Center>
-      ) : (
-        <DataTable
+      <DataTable
           striped
           highlightOnHover
           withTableBorder
@@ -126,7 +115,11 @@ export default function Repertoire() {
           onPageChange={setPage}
           sortStatus={sortStatus}
           onSortStatusChange={setSortStatus}
-          noRecordsText={t('repertoire.noMatchFilters')}
+          noRecordsText={
+            pieces.length === 0 && !status && !composerId && !search
+              ? t('repertoire.noPiecesTitle')
+              : t('repertoire.noMatchFilters')
+          }
           columns={[
             {
               accessor: 'title',
@@ -170,6 +163,12 @@ export default function Repertoire() {
             },
           ]}
         />
+      {pieces.length === 0 && !status && !composerId && !search && (
+        <Center>
+          <Button onClick={() => navigate('/pieces/new')}>
+            {t('repertoire.addFirstPiece')}
+          </Button>
+        </Center>
       )}
     </Stack>
   )

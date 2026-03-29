@@ -42,7 +42,7 @@ describe('Repertoire — with a piece', () => {
     cy.registerAndLogin()
     // Add a piece via the form
     cy.visit('/pieces/new')
-    cy.get('input[type="text"], input:not([type="password"]):not([type="checkbox"]):not([type="date"]):not([type="number"])').first().type('Moonlight Sonata')
+    cy.get('input[type="text"], input:not([type])').first().type('Moonlight Sonata')
     cy.get('select').first().select('Ludwig van Beethoven')
     cy.get('input[type="number"]').clear().type('7')
     cy.get('select').eq(1).select('active')

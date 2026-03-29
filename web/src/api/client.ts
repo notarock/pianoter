@@ -17,15 +17,23 @@ async function req<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json()
 }
 
+// Auth-specific request that throws on 401 instead of redirecting
+async function authReq<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(path, options)
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+  if (res.status === 204) return undefined as T
+  return res.json()
+}
+
 export const authApi = {
   register: (username: string, password: string) =>
-    req<{ token: string; user: User }>('/api/auth/register', {
+    authReq<{ token: string; user: User }>('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     }),
   login: (username: string, password: string) =>
-    req<{ token: string; user: User }>('/api/auth/login', {
+    authReq<{ token: string; user: User }>('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),

@@ -97,7 +97,7 @@ export default function Dashboard() {
               <Text size="2.5rem" lh={1}>🎼</Text>
               <Text fw={600} size="lg" c="#1A1612">{t('dashboard.emptyTitle')}</Text>
               <Text c="dimmed" size="sm">{t('dashboard.emptyDesc')}</Text>
-              <Button component={Link} to="/repertoire" mt="xs">
+              <Button onClick={() => navigate('/repertoire')} mt="xs">
                 {t('dashboard.goToRepertoire')}
               </Button>
             </Stack>
@@ -105,23 +105,25 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {all.length > 0 && <div>
+      <div>
         <Group justify="space-between" align="center" mb="md">
           <Title order={2} style={{ fontFamily: 'Playfair Display, serif' }}>
             {t('dashboard.toRevisitTitle')}{' '}
             <Text span size="sm" c="dimmed" fw={400}>{t('dashboard.toRevisitSub')}</Text>
           </Title>
-          <SegmentedControl
-            size="xs"
-            value={String(staleDays)}
-            onChange={v => setStaleDays(Number(v))}
-            data={[
-              { label: t('dashboard.days', { count: 7 }),  value: '7'  },
-              { label: t('dashboard.days', { count: 14 }), value: '14' },
-              { label: t('dashboard.days', { count: 30 }), value: '30' },
-              { label: t('dashboard.days', { count: 60 }), value: '60' },
-            ]}
-          />
+          {all.length > 0 && (
+            <SegmentedControl
+              size="xs"
+              value={String(staleDays)}
+              onChange={v => setStaleDays(Number(v))}
+              data={[
+                { label: t('dashboard.days', { count: 7 }),  value: '7'  },
+                { label: t('dashboard.days', { count: 14 }), value: '14' },
+                { label: t('dashboard.days', { count: 30 }), value: '30' },
+                { label: t('dashboard.days', { count: 60 }), value: '60' },
+              ]}
+            />
+          )}
         </Group>
 
         {stale.length === 0 ? (
@@ -173,7 +175,7 @@ export default function Dashboard() {
             ]}
           />
         )}
-      </div>}
+      </div>
     </Stack>
   )
 }

@@ -22,6 +22,7 @@ export default function PieceForm() {
   const [title, setTitle] = useState('')
   const [composerId, setComposerId] = useState('')
   const [difficulty, setDifficulty] = useState(5)
+  const [difficultyInput, setDifficultyInput] = useState('5')
   const [status, setStatus] = useState('wishlist')
   const [startedAt, setStartedAt] = useState<Date | null>(() => new Date())
   const [notes, setNotes] = useState('')
@@ -41,6 +42,7 @@ export default function PieceForm() {
         setTitle(p.title)
         setComposerId(String(p.composer_id))
         setDifficulty(p.difficulty ?? 5)
+        setDifficultyInput(String(p.difficulty ?? 5))
         setStatus(p.status)
         setStartedAt(p.started_at ? new Date(p.started_at) : null)
         setNotes(p.notes ?? '')
@@ -133,13 +135,28 @@ export default function PieceForm() {
             </Group>
           </div>
           <div>
-            <Text size="sm" fw={500} mb={6}>{t('pieceForm.labelDifficulty', { value: difficulty })}</Text>
+            <Group gap="xs" align="center" mb={6}>
+              <Text size="sm" fw={500}>{t('pieceForm.labelDifficulty', { value: difficulty })}</Text>
+              <TextInput
+                type="number"
+                value={difficultyInput}
+                onChange={e => {
+                  setDifficultyInput(e.target.value)
+                  const v = parseInt(e.target.value)
+                  if (!isNaN(v) && v >= 1 && v <= 10) setDifficulty(v)
+                }}
+                w={60}
+                size="xs"
+                min={1}
+                max={10}
+              />
+            </Group>
             <Slider
               aria-label="Difficulty (1–10)"
               min={1}
               max={10}
               value={difficulty}
-              onChange={setDifficulty}
+              onChange={v => { setDifficulty(v); setDifficultyInput(String(v)) }}
               marks={[1,3,5,7,10].map(v => ({ value: v, label: String(v) }))}
               color="dark"
               mb="md"

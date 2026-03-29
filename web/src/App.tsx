@@ -28,6 +28,7 @@ function Nav() {
         borderBottom: '1px solid var(--app-border)',
       }}
     >
+      <nav style={{ height: '100%' }}>
       <Stack gap={0} h="100%" justify="center">
         {/* Top row: brand + controls */}
         <Group px="xl" justify="space-between" wrap="nowrap" h={56}>
@@ -147,6 +148,7 @@ function Nav() {
           </Group>
         )}
       </Stack>
+      </nav>
     </AppShell.Header>
   )
 }

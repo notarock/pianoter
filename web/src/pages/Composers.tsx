@@ -10,8 +10,6 @@ import { api } from '../api/client'
 import type { Composer } from '../api/types'
 import { COMPOSER_NATIONALITIES } from '../api/types'
 
-const PAGE_SIZE = 20
-
 export default function Composers() {
   const { t } = useTranslation()
   const [composers, setComposers] = useState<Composer[]>([])
@@ -22,7 +20,6 @@ export default function Composers() {
   const [showForm, setShowForm] = useState(false)
   const [hideSystem, setHideSystem] = useState(false)
   const [search, setSearch] = useState('')
-  const [page, setPage] = useState(1)
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Composer>>({
     columnAccessor: 'name',
     direction: 'asc',
@@ -31,7 +28,6 @@ export default function Composers() {
   const load = () => api.composers.list().then(setComposers)
 
   useEffect(() => { load() }, [])
-  useEffect(() => { setPage(1) }, [hideSystem, search, sortStatus])
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,10 +64,6 @@ export default function Composers() {
       return direction === 'asc' ? cmp : -cmp
     })
   }, [filtered, sortStatus])
-
-  const paginated = useMemo(() =>
-    sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [sorted, page])
 
   return (
     <Stack gap="lg">
@@ -141,11 +133,7 @@ export default function Composers() {
         highlightOnHover
         withTableBorder
         verticalSpacing="sm"
-        records={paginated}
-        totalRecords={filtered.length}
-        recordsPerPage={PAGE_SIZE}
-        page={page}
-        onPageChange={setPage}
+        records={sorted}
         sortStatus={sortStatus}
         onSortStatusChange={setSortStatus}
         noRecordsText={t('composers.noComposers')}

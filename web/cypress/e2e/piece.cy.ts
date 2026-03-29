@@ -34,7 +34,7 @@ describe('Add Piece form', () => {
   })
 
   it('submitting the form navigates to the piece detail page', () => {
-    cy.get('input[type="text"], input:not([type="password"]):not([type="checkbox"]):not([type="date"]):not([type="number"])').first().type('Für Elise')
+    cy.get('input[type="text"], input:not([type])').first().type('Für Elise')
     cy.get('select').first().select('Ludwig van Beethoven')
     cy.get('button[type="submit"]').click()
     cy.url().should('match', /\/pieces\/\d+$/)
@@ -51,7 +51,7 @@ describe('Piece Detail page', () => {
   beforeEach(() => {
     cy.registerAndLogin()
     cy.visit('/pieces/new')
-    cy.get('input[type="text"], input:not([type="password"]):not([type="checkbox"]):not([type="date"]):not([type="number"])').first().type('Moonlight Sonata')
+    cy.get('input[type="text"], input:not([type])').first().type('Moonlight Sonata')
     cy.get('select').first().select('Ludwig van Beethoven')
     cy.get('button[type="submit"]').click()
     cy.url().should('match', /\/pieces\/\d+$/)
@@ -60,7 +60,7 @@ describe('Piece Detail page', () => {
   it('shows the piece title, composer, difficulty, status', () => {
     cy.contains('h1', 'Moonlight Sonata')
     cy.contains('Ludwig van Beethoven')
-    cy.contains(/active/i)
+    cy.contains(/wishlist/i)
   })
 
   it('shows "Never" for last played when no sessions logged', () => {
@@ -79,13 +79,13 @@ describe('Piece Detail page', () => {
 
   it('Log Practice Session button reveals the session form', () => {
     cy.contains('button', /log practice session/i).click()
-    cy.get('input[placeholder*="notes" i]').should('be.visible')
+    cy.get('[placeholder*="notes" i]').should('be.visible')
     cy.contains('button', /save/i)
   })
 
   it('logging a practice session updates the history', () => {
     cy.contains('button', /log practice session/i).click()
-    cy.get('input[placeholder*="notes" i]').type('Worked on the arpeggios')
+    cy.get('[placeholder*="notes" i]').type('Worked on the arpeggios')
     cy.contains('button', /save/i).click()
     cy.contains('Worked on the arpeggios')
   })
@@ -98,12 +98,12 @@ describe('Piece Detail page', () => {
 
   it('edit form is pre-filled with existing piece data', () => {
     cy.contains('a', /edit/i).click()
-    cy.get('input[type="text"], input:not([type="password"]):not([type="checkbox"]):not([type="date"]):not([type="number"])').first().should('have.value', 'Moonlight Sonata')
+    cy.get('input[type="text"], input:not([type])').first().should('have.value', 'Moonlight Sonata')
   })
 
   it('saving edits updates the piece and returns to detail page', () => {
     cy.contains('a', /edit/i).click()
-    cy.get('input[type="text"], input:not([type="password"]):not([type="checkbox"]):not([type="date"]):not([type="number"])').first().clear().type('Für Elise')
+    cy.get('input[type="text"], input:not([type])').first().clear().type('Für Elise')
     cy.contains('button', /save changes/i).click()
     cy.contains('h1', 'Für Elise')
   })

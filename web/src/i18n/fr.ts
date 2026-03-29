@@ -73,6 +73,7 @@ const fr = {
     noPiecesTitle: 'Aucune pièce',
     noPiecesDesc: 'Utilisez le bouton <bold>+ Ajouter une pièce</bold> ci-dessus pour commencer.',
     noMatchFilters: 'Aucune pièce ne correspond à vos filtres.',
+    addFirstPiece: 'Ajouter votre première pièce',
   },
   pieceForm: {
     addTitle: 'Ajouter une pièce',
