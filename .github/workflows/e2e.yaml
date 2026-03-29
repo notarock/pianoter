@@ -68,8 +68,13 @@ jobs:
         working-directory: web
 
       - name: Wait for frontend
-        run: npx wait-on http://localhost:5174 --timeout 60000
-        working-directory: web
+        run: |
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:5174/ > /dev/null 2>&1; then
+              echo "Frontend ready"; break
+            fi
+            echo "Waiting ($i/30)..."; sleep 2
+          done
 
       - name: Run Cypress E2E tests
         uses: cypress-io/github-action@v6
