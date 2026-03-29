@@ -6,6 +6,7 @@ build:
   path: web
   artifact_name: pianoter-web
   upload_artifact: false
+  test_cmd: "make test-frontend"
 
 release:
   rolling: false

@@ -113,9 +113,9 @@ describe('Repertoire page', () => {
   it('shows "no pieces match your filters" when filters are active but no results', async () => {
     renderWithProviders(<Repertoire />)
     await screen.findByRole('heading', { name: /repertoire/i })
-    // Mantine Select renders options in DOM even when closed; use fireEvent to select one
     const wishlistOption = screen.getByRole('option', { name: /wishlist/i, hidden: true })
-    fireEvent.click(wishlistOption)
+    const statusSelect = (wishlistOption as HTMLElement).closest('select')!
+    fireEvent.change(statusSelect, { target: { value: 'wishlist' } })
     expect(await screen.findByText(/no pieces match your filters/i)).toBeInTheDocument()
   })
 })
