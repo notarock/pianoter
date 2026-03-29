@@ -16,17 +16,10 @@ on:
       - main
 
 jobs:
-  backend:
+  build:
     uses: notarock/tuyauterie/.github/workflows/tuyauterie.yml@main
     with:
       github-event: ${{ github.event_name }}
-    secrets:
-      GITOPS_REPOSITORY_TOKEN: ${{ secrets.GITOPS_REPOSITORY_TOKEN }}
-
-  web:
-    uses: notarock/tuyauterie/.github/workflows/tuyauterie.yml@main
-    with:
-      github-event: ${{ github.event_name }}
-      tuyauterie-path: 'web/.tuyauterie.yaml'
+      tuyauterie-files: '["web/.tuyauterie.yaml", ".tuyauterie.yaml"]'
     secrets:
       GITOPS_REPOSITORY_TOKEN: ${{ secrets.GITOPS_REPOSITORY_TOKEN }}
