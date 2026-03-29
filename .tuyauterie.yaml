@@ -9,3 +9,9 @@ build:
 release:
   rolling: false
   on-tag: true
+
+deploy:
+  gitops:
+    enable: true
+    repository: "notarock/gitops"
+    manifest: "pianoter/backend-deployment.yaml"
