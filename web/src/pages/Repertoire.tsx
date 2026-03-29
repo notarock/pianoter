@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Title, Group, Button, NativeSelect, Badge,
-  Anchor, Text, Center, Stack, TextInput,
+  Anchor, Center, Stack, TextInput,
 } from '@mantine/core'
 import { DataTable, type DataTableSortStatus } from 'mantine-datatable'
 import { useTranslation } from 'react-i18next'
