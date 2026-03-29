@@ -1,0 +1,85 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:12
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: pianoter
+          MARIADB_USER: pianoter
+          MARIADB_PASSWORD: pianoter
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --- Go backend ---
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+
+      - name: Build backend
+        run: go build -o pianoter .
+
+      - name: Start backend
+        run: ./pianoter &
+        env:
+          DB_HOST: 127.0.0.1
+
+      - name: Wait for backend
+        run: |
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:8080/ > /dev/null 2>&1; then
+              echo "Backend ready"; break
+            fi
+            echo "Waiting ($i/30)..."; sleep 2
+          done
+
+      # --- Cypress ---
+      - name: Run Cypress E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: web
+          start: npm run dev
+          wait-on: http://localhost:5174
+          wait-on-timeout: 60
+          browser: chrome
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: web/cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Upload videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: web/cypress/videos
+          if-no-files-found: ignore

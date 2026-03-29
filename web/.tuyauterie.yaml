@@ -6,7 +6,7 @@ build:
   path: web
   artifact_name: pianoter-web
   upload_artifact: false
-  test_cmd: "npm test && npm run cy:run" 
+  test_cmd: "npm test"
 
 release:
   rolling: false
