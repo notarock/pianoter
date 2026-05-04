@@ -93,6 +93,18 @@ export default function PieceDetail() {
             <Table.Td c="dimmed" pr="xl">{t('pieceDetail.colComposer')}</Table.Td>
             <Table.Td>{piece.composer?.name ?? '—'}</Table.Td>
           </Table.Tr>
+          {piece.opus && (
+            <Table.Tr>
+              <Table.Td c="dimmed" pr="xl">{t('pieceForm.labelOpus')}</Table.Td>
+              <Table.Td>{piece.opus}</Table.Td>
+            </Table.Tr>
+          )}
+          {piece.number && (
+            <Table.Tr>
+              <Table.Td c="dimmed" pr="xl">{t('pieceForm.labelNumber')}</Table.Td>
+              <Table.Td>{piece.number}</Table.Td>
+            </Table.Tr>
+          )}
           <Table.Tr>
             <Table.Td c="dimmed" pr="xl">{t('pieceDetail.colDifficulty')}</Table.Td>
             <Table.Td>

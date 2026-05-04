@@ -149,6 +149,18 @@ export default function Dashboard() {
                 ),
               },
               {
+                accessor: 'opus',
+                title: t('dashboard.colOpus'),
+                sortable: true,
+                render: p => p.opus || '—',
+              },
+              {
+                accessor: 'number',
+                title: t('dashboard.colNumber'),
+                sortable: true,
+                render: p => p.number || '—',
+              },
+              {
                 accessor: 'composer',
                 title: t('dashboard.colComposer'),
                 sortable: true,

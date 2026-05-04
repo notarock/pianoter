@@ -44,7 +44,7 @@ export default function Repertoire() {
   const composerOptions = composers.map(c => ({ value: String(c.id), label: c.name }))
 
   const filtered = useMemo(() =>
-    pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase())),
+    pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.opus.toLowerCase().includes(search.toLowerCase()) || p.number.toLowerCase().includes(search.toLowerCase())),
     [pieces, search])
 
   const sorted = useMemo(() => {
@@ -138,6 +138,18 @@ export default function Repertoire() {
               render: p => p.composer
                 ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
                 : '—',
+            },
+            {
+              accessor: 'opus',
+              title: t('repertoire.colOpus'),
+              sortable: true,
+              render: p => p.opus || '—',
+            },
+            {
+              accessor: 'number',
+              title: t('repertoire.colNumber'),
+              sortable: true,
+              render: p => p.number || '—',
             },
             {
               accessor: 'difficulty',

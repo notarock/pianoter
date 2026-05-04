@@ -32,6 +32,8 @@ describe('PieceForm — Add mode', () => {
   it('renders Title, Composer, Difficulty, Status, Started At fields', async () => {
     renderWithRoute('/pieces/new', <PieceForm />, '/pieces/new')
     expect(await screen.findByLabelText(/title/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/opus/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/number/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/composer/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/difficulty/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/status/i)).toBeInTheDocument()
@@ -71,7 +73,7 @@ describe('PieceForm — Add mode', () => {
     await userEvent.click(screen.getByRole('button', { name: /^add piece$/i }))
 
     expect(client.api.pieces.create).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Für Elise', composer_id: 2 })
+      expect.objectContaining({ title: 'Für Elise', opus: '', number: '', composer_id: 2 })
     )
   })
 })

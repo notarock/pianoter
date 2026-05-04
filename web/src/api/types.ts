@@ -37,6 +37,8 @@ export type PlayingLevel = typeof PLAYING_LEVELS[number]['key']
 export interface Piece {
   id: number
   title: string
+  opus: string
+  number: string
   composer_id: number
   composer: Composer
   difficulty: number

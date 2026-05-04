@@ -45,6 +45,10 @@ func (h *PieceHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	if p.Title == "" && p.Opus == "" && p.Number == "" {
+		http.Error(w, "at least one of title, opus, or number is required", http.StatusBadRequest)
+		return
+	}
 	p.UserID = userIDFromCtx(r)
 	if result := h.DB.Create(&p); result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)

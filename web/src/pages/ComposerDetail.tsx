@@ -97,6 +97,18 @@ export default function ComposerDetail() {
                 ),
               },
               {
+                accessor: 'opus',
+                title: t('composerDetail.colOpus'),
+                sortable: true,
+                render: p => p.opus || '—',
+              },
+              {
+                accessor: 'number',
+                title: t('composerDetail.colNumber'),
+                sortable: true,
+                render: p => p.number || '—',
+              },
+              {
                 accessor: 'difficulty',
                 title: t('composerDetail.colDifficulty'),
                 sortable: true,

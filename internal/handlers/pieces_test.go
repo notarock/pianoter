@@ -329,3 +329,83 @@ func TestPieceDelete_404ForAnotherUsersPiece(t *testing.T) {
 		t.Fatalf("expected 404, got %d", rr.Code)
 	}
 }
+
+func TestPieceCreate_RejectAllEmpty(t *testing.T) {
+	_, r := setupPieceRouter(t, 1)
+
+	body := `{"status":"wishlist","difficulty":4}`
+	req := httptest.NewRequest(http.MethodPost, "/pieces", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestPieceCreate_WithOpusOnly(t *testing.T) {
+	_, r := setupPieceRouter(t, 1)
+
+	body := `{"opus":"Op. 28","status":"learning"}`
+	req := httptest.NewRequest(http.MethodPost, "/pieces", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d: %s", rr.Code, rr.Body.String())
+	}
+
+	var p map[string]any
+	json.NewDecoder(rr.Body).Decode(&p)
+	if p["opus"] != "Op. 28" {
+		t.Errorf("expected opus 'Op. 28', got %v", p["opus"])
+	}
+}
+
+func TestPieceCreate_WithNumberOnly(t *testing.T) {
+	_, r := setupPieceRouter(t, 1)
+
+	body := `{"number":"No. 5","status":"active"}`
+	req := httptest.NewRequest(http.MethodPost, "/pieces", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d: %s", rr.Code, rr.Body.String())
+	}
+
+	var p map[string]any
+	json.NewDecoder(rr.Body).Decode(&p)
+	if p["number"] != "No. 5" {
+		t.Errorf("expected number 'No. 5', got %v", p["number"])
+	}
+}
+
+func TestPieceUpdate_SavesOpusAndNumber(t *testing.T) {
+	h, r := setupPieceRouter(t, 1)
+
+	piece := models.Piece{UserID: 1, Title: "Waldstein", Status: "active"}
+	h.DB.Create(&piece)
+
+	body := `{"title":"Waldstein","opus":"Op. 53","number":"No. 21"}`
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/pieces/%d", piece.ID), bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+
+	var p map[string]any
+	json.NewDecoder(rr.Body).Decode(&p)
+	if p["opus"] != "Op. 53" {
+		t.Errorf("expected opus 'Op. 53', got %v", p["opus"])
+	}
+	if p["number"] != "No. 21" {
+		t.Errorf("expected number 'No. 21', got %v", p["number"])
+	}
+}

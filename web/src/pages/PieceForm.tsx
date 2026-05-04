@@ -20,13 +20,15 @@ export default function PieceForm() {
 
   const [composers, setComposers] = useState<Composer[]>([])
   const [title, setTitle] = useState('')
+  const [opus, setOpus] = useState('')
+  const [number, setNumber] = useState('')
   const [composerId, setComposerId] = useState('')
   const [difficulty, setDifficulty] = useState(5)
   const [difficultyInput, setDifficultyInput] = useState('5')
   const [status, setStatus] = useState('wishlist')
   const [startedAt, setStartedAt] = useState<Date | null>(() => new Date())
   const [notes, setNotes] = useState('')
-  const [errors, setErrors] = useState<{ title?: string; composer?: string }>({})
+  const [errors, setErrors] = useState<{ title?: string; opus?: string; number?: string; composer?: string }>({})
 
   // Quick-add composer modal
   const [composerModalOpened, { open: openComposerModal, close: closeComposerModal }] = useDisclosure(false)
@@ -40,6 +42,8 @@ export default function PieceForm() {
     if (isEdit) {
       api.pieces.get(Number(id)).then(p => {
         setTitle(p.title)
+        setOpus(p.opus)
+        setNumber(p.number)
         setComposerId(String(p.composer_id))
         setDifficulty(p.difficulty ?? 5)
         setDifficultyInput(String(p.difficulty ?? 5))
@@ -53,12 +57,14 @@ export default function PieceForm() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs: typeof errors = {}
-    if (!title.trim()) errs.title = t('pieceForm.errorTitle')
+    if (!title.trim() && !opus.trim() && !number.trim()) errs.title = t('pieceForm.errorTitle')
     if (!composerId) errs.composer = t('pieceForm.errorComposer')
     if (Object.keys(errs).length) { setErrors(errs); return }
 
     const data = {
       title,
+      opus,
+      number,
       composer_id: Number(composerId),
       difficulty,
       status: status as Piece['status'],
@@ -109,6 +115,20 @@ export default function PieceForm() {
             value={title}
             onChange={e => { setTitle(e.target.value); setErrors(v => ({ ...v, title: undefined })) }}
             error={errors.title}
+          />
+          <TextInput
+            label={t('pieceForm.labelOpus')}
+            placeholder={t('pieceForm.opusPlaceholder')}
+            value={opus}
+            onChange={e => { setOpus(e.target.value); setErrors(v => ({ ...v, opus: undefined })) }}
+            error={errors.opus}
+          />
+          <TextInput
+            label={t('pieceForm.labelNumber')}
+            placeholder={t('pieceForm.numberPlaceholder')}
+            value={number}
+            onChange={e => { setNumber(e.target.value); setErrors(v => ({ ...v, number: undefined })) }}
+            error={errors.number}
           />
           <div>
             <Group gap="xs" align="flex-end">
