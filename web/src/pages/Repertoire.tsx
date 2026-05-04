@@ -76,14 +76,10 @@ export default function Repertoire() {
       if (groupBy === 'composer') {
         key = p.composer?.name || '(no composer)'
       } else if (groupBy === 'opus') {
-        key = p.opus
-          ? (p.opus.startsWith('Op.') || p.opus.startsWith('op.') ? p.opus : `Op. ${p.opus}`)
-          : '(no opus)'
+        key = p.opus || '(no opus)'
       } else {
         const composer = p.composer?.name || '(no composer)'
-        const opus = p.opus
-          ? (p.opus.startsWith('Op.') || p.opus.startsWith('op.') ? p.opus : `Op. ${p.opus}`)
-          : '(no opus)'
+        const opus = p.opus || '(no opus)'
         key = `${composer} — ${opus}`
       }
       if (!groups[key]) groups[key] = []

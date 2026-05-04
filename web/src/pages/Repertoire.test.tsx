@@ -56,14 +56,10 @@ function groupPieces(pieces: Piece[], groupBy: 'composer' | 'opus' | 'composer-o
     if (groupBy === 'composer') {
       key = p.composer?.name || '(no composer)'
     } else if (groupBy === 'opus') {
-      key = p.opus
-        ? (p.opus.startsWith('Op.') || p.opus.startsWith('op.') ? p.opus : `Op. ${p.opus}`)
-        : '(no opus)'
+      key = p.opus || '(no opus)'
     } else {
       const composer = p.composer?.name || '(no composer)'
-      const opus = p.opus
-        ? (p.opus.startsWith('Op.') || p.opus.startsWith('op.') ? p.opus : `Op. ${p.opus}`)
-        : '(no opus)'
+      const opus = p.opus || '(no opus)'
       key = `${composer} — ${opus}`
     }
     if (!groups[key]) groups[key] = []
@@ -172,12 +168,12 @@ describe('groupPieces', () => {
     expect(result).toEqual([])
   })
 
-  it('adds Op. prefix when missing', () => {
+  it('uses opus value as-is without prefix', () => {
     const pieces: Piece[] = [
       makePiece({ id: 1, title: 'Test', opus: '27' }),
     ]
     const result = groupPieces(pieces, 'opus')
-    expect(result[0].name).toBe('Op. 27')
+    expect(result[0].name).toBe('27')
   })
 
   it('preserves existing Op. prefix', () => {
@@ -407,7 +403,7 @@ describe('Repertoire page', () => {
       expect(selectedOption?.value).toBe('composer-opus')
     })
 
-    it('opus groups show "Op." prefix', async () => {
+    it('shows opus group headers', async () => {
       vi.mocked(client.api.pieces.list).mockResolvedValue([
         makePiece({ id: 1, title: 'Moonlight Sonata', opus: 'Op. 27 No. 2' }),
         makePiece({ id: 2, title: 'Waldstein', opus: 'Op. 53' }),
