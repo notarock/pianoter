@@ -24,7 +24,7 @@ vi.mock('mantine-datatable', () => ({
 vi.mock('../api/client', () => ({
   authApi: {},
   api: {
-    pieces: { list: vi.fn() },
+    pieces: { list: vi.fn<({ status, composer_id }: { status?: string; composer_id?: number; stale_days?: number }) => Promise<Piece[]>>() },
     composers: { list: vi.fn() },
   },
 }))
@@ -34,6 +34,8 @@ const beethoven: Composer = { id: 2, user_id: 0, name: 'Ludwig van Beethoven', n
 const makePiece = (overrides: Partial<Piece> = {}): Piece => ({
   id: 1,
   title: 'Moonlight Sonata',
+  opus: '',
+  number: '',
   composer_id: 2,
   composer: beethoven,
   difficulty: 7,
@@ -622,7 +624,7 @@ describe('Repertoire page', () => {
         Array.from(s.querySelectorAll('option')).some(o => o.value === 'wishlist'),
       )!
       fireEvent.change(statusSelect, { target: { value: 'wishlist' } })
-      const composerSelect = selects[1]!
+      const composerSelect = selects[1] as HTMLSelectElement
       fireEvent.change(composerSelect, { target: { value: '2' } })
       expect(await screen.findByText('Wishlist Beethoven')).toBeInTheDocument()
     })
@@ -706,7 +708,7 @@ describe('Repertoire page', () => {
       const flatOption = toggle.querySelector('input[value="flat"]') as HTMLInputElement
       fireEvent.click(flatOption)
       const selects = screen.getAllByRole('combobox')
-      const composerSelect = selects[1]!
+      const composerSelect = selects[1] as HTMLSelectElement
       fireEvent.change(composerSelect, { target: { value: '2' } })
       const searchInput = screen.getByPlaceholderText(/search/i)
       fireEvent.change(searchInput, { target: { value: 'Moonlight' } })

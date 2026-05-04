@@ -33,6 +33,8 @@ vi.mock('../api/client', () => ({
 const makePiece = (overrides: Partial<Piece> = {}): Piece => ({
   id: 1,
   title: 'Moonlight Sonata',
+  opus: '',
+  number: '',
   composer_id: 2,
   composer: { id: 2, user_id: 0, name: 'Beethoven', nationality: 'German', born_year: 1770, died_year: 1827 },
   difficulty: 7,

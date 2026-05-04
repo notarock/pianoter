@@ -82,6 +82,8 @@ describe('PieceForm — Edit mode', () => {
   const existingPiece: Piece = {
     id: 7,
     title: 'Moonlight Sonata',
+    opus: 'Op. 27 No. 2',
+    number: '2',
     composer_id: 2,
     composer: beethoven,
     difficulty: 7,
@@ -89,7 +91,7 @@ describe('PieceForm — Edit mode', () => {
     started_at: '2026-01-01T00:00:00Z',
     last_played_at: null,
     current_level: '',
-  notes: '',
+    notes: '',
   }
 
   beforeEach(() => {

@@ -60,7 +60,6 @@ const en = {
     colNumber: 'No.',
     colStatus: 'Status',
     colLastPlayed: 'Last Played',
-    colStatus: 'Status',
   },
   repertoire: {
     title: 'Repertoire',
@@ -81,10 +80,6 @@ const en = {
     addFirstPiece: 'Add your first piece',
     grouped: 'Grouped',
     flat: 'Flat',
-    groupBy: 'Group by',
-    groupByComposer: 'Composer',
-    groupByOpus: 'Opus',
-    groupByComposerAndOpus: 'Composer + Opus',
     groupBy: 'Group by',
     groupByComposer: 'Composer',
     groupByOpus: 'Opus',

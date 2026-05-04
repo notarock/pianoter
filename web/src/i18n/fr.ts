@@ -60,7 +60,6 @@ const fr = {
     colNumber: 'No.',
     colStatus: 'Statut',
     colLastPlayed: 'Dernière pratique',
-    colStatus: 'Statut',
   },
   repertoire: {
     title: 'Répertoire',
@@ -81,10 +80,6 @@ const fr = {
     addFirstPiece: 'Ajouter votre première pièce',
     grouped: 'Regroupé',
     flat: 'Plat',
-    groupBy: 'Grouper par',
-    groupByComposer: 'Compositeur',
-    groupByOpus: 'Opus',
-    groupByComposerAndOpus: 'Compositeur + Opus',
     groupBy: 'Grouper par',
     groupByComposer: 'Compositeur',
     groupByOpus: 'Opus',

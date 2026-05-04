@@ -17,6 +17,8 @@ vi.mock('../api/client', () => ({
 const piece: Piece = {
   id: 1,
   title: 'Moonlight Sonata',
+  opus: 'Op. 27 No. 2',
+  number: '2',
   composer_id: 2,
   composer: { id: 2, user_id: 0, name: 'Ludwig van Beethoven', nationality: 'German', born_year: 1770, died_year: 1827 },
   difficulty: 7,
