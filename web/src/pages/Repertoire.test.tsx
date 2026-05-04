@@ -24,7 +24,7 @@ vi.mock('mantine-datatable', () => ({
 vi.mock('../api/client', () => ({
   authApi: {},
   api: {
-    pieces: { list: vi.fn<({ status, composer_id }: { status?: string; composer_id?: number; stale_days?: number }) => Promise<Piece[]>>() },
+    pieces: { list: vi.fn() },
     composers: { list: vi.fn() },
   },
 }))
@@ -403,7 +403,7 @@ describe('Repertoire page', () => {
         Array.from(s.querySelectorAll('option')).some(o => o.value === 'composer-opus'),
       )
       expect(groupBySelect).toBeDefined()
-      const selectedOption = groupBySelect!.querySelector('option:checked')
+      const selectedOption = groupBySelect!.querySelector('option:checked') as HTMLOptionElement | null
       expect(selectedOption?.value).toBe('composer-opus')
     })
 
@@ -498,8 +498,8 @@ describe('Repertoire page', () => {
 
   describe('filter + search interactions', () => {
     it('filters by status and shows matching pieces', async () => {
-      vi.mocked(client.api.pieces.list).mockImplementation(async ({ status }) => {
-        if (status === 'wishlist') return [makePiece({ id: 2, title: 'Wishlist Piece', status: 'wishlist' })]
+      vi.mocked(client.api.pieces.list).mockImplementation(async (params: any) => {
+        if (params?.status === 'wishlist') return [makePiece({ id: 2, title: 'Wishlist Piece', status: 'wishlist' })]
         return [
           makePiece({ id: 1, title: 'Active Piece', status: 'active' }),
           makePiece({ id: 2, title: 'Wishlist Piece', status: 'wishlist' }),
@@ -516,8 +516,8 @@ describe('Repertoire page', () => {
     })
 
     it('clears status filter and shows all pieces', async () => {
-      vi.mocked(client.api.pieces.list).mockImplementation(async ({ status }) => {
-        if (status === 'wishlist') return [makePiece({ id: 2, title: 'Wishlist Piece', status: 'wishlist' })]
+      vi.mocked(client.api.pieces.list).mockImplementation(async (params: any) => {
+        if (params?.status === 'wishlist') return [makePiece({ id: 2, title: 'Wishlist Piece', status: 'wishlist' })]
         return [
           makePiece({ id: 1, title: 'Active Piece', status: 'active' }),
           makePiece({ id: 2, title: 'Wishlist Piece', status: 'wishlist' }),
@@ -526,7 +526,7 @@ describe('Repertoire page', () => {
       renderWithProviders(<Repertoire />)
       const selects = screen.getAllByRole('combobox')
       const statusSelect = selects.find(s =>
-        Array.from(s.querySelectorAll('option')).some(o => o.value === ''),
+        Array.from(s.querySelectorAll('option')).some(o => o.value === 'wishlist'),
       )!
       fireEvent.change(statusSelect, { target: { value: 'wishlist' } })
       expect(await screen.findByText('Wishlist Piece')).toBeInTheDocument()
@@ -573,8 +573,8 @@ describe('Repertoire page', () => {
     })
 
     it('filters by composer and shows matching pieces', async () => {
-      vi.mocked(client.api.pieces.list).mockImplementation(async ({ composer_id }) => {
-        if (composer_id === 99) return []
+      vi.mocked(client.api.pieces.list).mockImplementation(async (params: any) => {
+        if (params?.composer_id === 99) return []
         return [
           makePiece({ id: 1, title: 'Moonlight Sonata' }),
           makePiece({ id: 2, title: 'Für Elise' }),
@@ -590,8 +590,8 @@ describe('Repertoire page', () => {
     })
 
     it('clearing composer filter shows all pieces', async () => {
-      vi.mocked(client.api.pieces.list).mockImplementation(async ({ composer_id }) => {
-        if (composer_id === 99) return []
+      vi.mocked(client.api.pieces.list).mockImplementation(async (params: any) => {
+        if (params?.composer_id === 99) return []
         return [
           makePiece({ id: 1, title: 'Moonlight Sonata' }),
           makePiece({ id: 2, title: 'Für Elise' }),
@@ -608,8 +608,8 @@ describe('Repertoire page', () => {
     })
 
     it('combines status and composer filters', async () => {
-      vi.mocked(client.api.pieces.list).mockImplementation(async ({ status, composer_id }) => {
-        if (status === 'wishlist' && composer_id === 2) {
+      vi.mocked(client.api.pieces.list).mockImplementation(async (params: any) => {
+        if (params?.status === 'wishlist' && params?.composer_id === 2) {
           return [makePiece({ id: 2, title: 'Wishlist Beethoven', status: 'wishlist', composer_id: 2 })]
         }
         return []
@@ -675,8 +675,8 @@ describe('Repertoire page', () => {
     })
 
     it('search combined with status filter narrows results', async () => {
-      vi.mocked(client.api.pieces.list).mockImplementation(async ({ status }) => {
-        if (status === 'active') {
+      vi.mocked(client.api.pieces.list).mockImplementation(async (params: any) => {
+        if (params?.status === 'active') {
           return [makePiece({ id: 1, title: 'Active Moonlight', opus: 'Op. 27' })]
         }
         return []
@@ -696,8 +696,8 @@ describe('Repertoire page', () => {
     })
 
     it('search combined with composer filter narrows results', async () => {
-      vi.mocked(client.api.pieces.list).mockImplementation(async ({ composer_id }) => {
-        if (composer_id === 2) {
+      vi.mocked(client.api.pieces.list).mockImplementation(async (params: any) => {
+        if (params?.composer_id === 2) {
           return [makePiece({ id: 1, title: 'Beethoven Moonlight', opus: 'Op. 27' })]
         }
         return []
