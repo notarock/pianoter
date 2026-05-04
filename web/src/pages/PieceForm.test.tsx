@@ -76,6 +76,57 @@ describe('PieceForm — Add mode', () => {
       expect.objectContaining({ title: 'Für Elise', opus: '', number: '', composer_id: 2 })
     )
   })
+
+  it('handles typed date string in started_at field', async () => {
+    vi.mocked(client.api.pieces.create).mockResolvedValue({ id: 99 } as Piece)
+    renderWithRoute('/pieces/new', <PieceForm />, '/pieces/new')
+
+    await userEvent.type(await screen.findByLabelText(/title/i), 'Für Elise')
+    await userEvent.selectOptions(screen.getByLabelText(/composer/i), '2')
+    const dateInput = await screen.findByLabelText(/started at/i)
+    await userEvent.type(dateInput, '2025-01-15')
+    await userEvent.click(screen.getByRole('button', { name: /^add piece$/i }))
+
+    expect(client.api.pieces.create).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Für Elise', opus: '', number: '', composer_id: 2 })
+    )
+  })
+
+  it('handles invalid date string in started_at field without crashing', async () => {
+    vi.mocked(client.api.pieces.create).mockResolvedValue({ id: 99 } as Piece)
+    renderWithRoute('/pieces/new', <PieceForm />, '/pieces/new')
+
+    await userEvent.type(await screen.findByLabelText(/title/i), 'Für Elise')
+    await userEvent.selectOptions(screen.getByLabelText(/composer/i), '2')
+    const dateInput = await screen.findByLabelText(/started at/i)
+    await userEvent.type(dateInput, 'not-a-date')
+    await userEvent.click(screen.getByRole('button', { name: /^add piece$/i }))
+
+    expect(client.api.pieces.create).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Für Elise', opus: '', number: '', composer_id: 2 })
+    )
+  })
+
+  it('submits with status active and a past start date', async () => {
+    vi.mocked(client.api.pieces.create).mockResolvedValue({ id: 99 } as Piece)
+    renderWithRoute('/pieces/new', <PieceForm />, '/pieces/new')
+
+    await userEvent.type(await screen.findByLabelText(/title/i), 'Moonlight Sonata')
+    await userEvent.selectOptions(screen.getByLabelText(/composer/i), '2')
+    const dateInput = await screen.findByLabelText(/started at/i)
+    await userEvent.type(dateInput, '2024-06-15')
+    await userEvent.selectOptions(screen.getByLabelText(/status/i), 'active')
+    await userEvent.click(screen.getByRole('button', { name: /^add piece$/i }))
+
+    expect(client.api.pieces.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Moonlight Sonata',
+        status: 'active',
+      })
+    )
+    const submitted = vi.mocked(client.api.pieces.create).mock.calls[0][0]
+    expect(submitted.started_at).toBeDefined()
+  })
 })
 
 describe('PieceForm — Edit mode', () => {

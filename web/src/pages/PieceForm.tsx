@@ -205,7 +205,17 @@ export default function PieceForm() {
             label={t('pieceForm.labelStartedAt')}
             placeholder={t('pieceForm.datePlaceholder')}
             value={startedAt}
-            onChange={v => setStartedAt(v as Date | null)}
+            onChange={v => {
+              if (v != null && typeof v === 'object' && 'toISOString' in v) {
+                const d = v as Date
+                setStartedAt(!isNaN(d.getTime()) ? d : null)
+              } else if (typeof v === 'string' && v.trim()) {
+                const d = new Date(v)
+                setStartedAt(!isNaN(d.getTime()) ? d : null)
+              } else {
+                setStartedAt(null)
+              }
+            }}
             clearable
             valueFormat="MMM D, YYYY"
           />
