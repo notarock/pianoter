@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Title, Group, Button, NativeSelect, Badge,
-  Anchor, Center, Stack, TextInput,
+  Anchor, Center, Stack, TextInput, SegmentedControl, Accordion, Text,
 } from '@mantine/core'
 import { DataTable, type DataTableSortStatus } from 'mantine-datatable'
 import { useTranslation } from 'react-i18next'
@@ -21,6 +21,8 @@ export default function Repertoire() {
   const [composerId, setComposerId] = useState('')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [grouped, setGrouped] = useState(true)
+  const [groupBy, setGroupBy] = useState<'composer' | 'opus' | 'composer-opus'>('composer-opus')
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Piece>>({
     columnAccessor: 'title',
     direction: 'asc',
@@ -44,7 +46,7 @@ export default function Repertoire() {
   const composerOptions = composers.map(c => ({ value: String(c.id), label: c.name }))
 
   const filtered = useMemo(() =>
-    pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.opus.toLowerCase().includes(search.toLowerCase()) || p.number.toLowerCase().includes(search.toLowerCase())),
+    pieces.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase()) || (p.opus || '').toLowerCase().includes(search.toLowerCase()) || (p.number || '').toLowerCase().includes(search.toLowerCase())),
     [pieces, search])
 
   const sorted = useMemo(() => {
@@ -66,10 +68,114 @@ export default function Repertoire() {
     sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
     [sorted, page])
 
+  const groupedItems = useMemo(() => {
+    if (!grouped) return null
+    const groups: Record<string, Piece[]> = {}
+    for (const p of sorted) {
+      let key: string
+      if (groupBy === 'composer') {
+        key = p.composer?.name || '(no composer)'
+      } else if (groupBy === 'opus') {
+        key = p.opus
+          ? (p.opus.startsWith('Op.') || p.opus.startsWith('op.') ? p.opus : `Op. ${p.opus}`)
+          : '(no opus)'
+      } else {
+        const composer = p.composer?.name || '(no composer)'
+        const opus = p.opus
+          ? (p.opus.startsWith('Op.') || p.opus.startsWith('op.') ? p.opus : `Op. ${p.opus}`)
+          : '(no opus)'
+        key = `${composer} — ${opus}`
+      }
+      if (!groups[key]) groups[key] = []
+      groups[key].push(p)
+    }
+    return Object.entries(groups)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, pieces]) => ({ name, pieces }))
+  }, [sorted, grouped, groupBy])
+
+  const groupColumns = [
+    {
+      accessor: 'title' as const,
+      title: t('repertoire.colTitle'),
+      sortable: true,
+      render: (p: Piece) => (
+        <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>
+          {p.title}
+        </Anchor>
+      ),
+    },
+    {
+      accessor: 'composer' as const,
+      title: t('repertoire.colComposer'),
+      sortable: true,
+      render: (p: Piece) => p.composer
+        ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
+        : '—',
+    },
+    {
+      accessor: 'opus' as const,
+      title: t('repertoire.colOpus'),
+      sortable: true,
+      render: (p: Piece) => p.opus || '—',
+    },
+    {
+      accessor: 'number' as const,
+      title: t('repertoire.colNumber'),
+      sortable: true,
+      render: (p: Piece) => p.number || '—',
+    },
+    {
+      accessor: 'difficulty' as const,
+      title: t('repertoire.colDifficulty'),
+      sortable: true,
+      render: (p: Piece) => `${p.difficulty}/10`,
+    },
+    {
+      accessor: 'status' as const,
+      title: t('repertoire.colStatus'),
+      sortable: true,
+      render: (p: Piece) => (
+        <Badge color={statusColor(p.status)} variant="light" radius="sm">
+          {t(`status.${p.status}`)}
+        </Badge>
+      ),
+    },
+    {
+      accessor: 'last_played_at' as const,
+      title: t('repertoire.colLastPlayed'),
+      sortable: true,
+      render: (p: Piece) => formatDate(p.last_played_at) ?? t('common.never'),
+    },
+  ]
+
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="center">
         <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{t('repertoire.title')}</Title>
+        <Group gap="sm">
+          <SegmentedControl
+            size="sm"
+            value={grouped ? 'grouped' : 'flat'}
+            onChange={v => { setGrouped(v === 'grouped'); setPage(1) }}
+            data={[
+              { value: 'flat', label: t('repertoire.flat') },
+              { value: 'grouped', label: t('repertoire.grouped') },
+            ]}
+          />
+          {grouped && (
+            <NativeSelect
+              value={groupBy}
+              onChange={e => { setGroupBy(e.target.value as typeof groupBy); setPage(1) }}
+              data={[
+                { value: 'composer', label: t('repertoire.groupByComposer') },
+                { value: 'opus', label: t('repertoire.groupByOpus') },
+                { value: 'composer-opus', label: t('repertoire.groupByComposerAndOpus') },
+              ]}
+              w={200}
+            />
+          )}
+        </Group>
         <Button component={Link} to="/pieces/new">{t('repertoire.addPiece')}</Button>
       </Group>
 
@@ -103,7 +209,61 @@ export default function Repertoire() {
         />
       </Group>
 
-      <DataTable
+      {groupedItems ? (
+        <Stack gap="sm">
+          {(() => {
+            const start = (page - 1) * PAGE_SIZE
+            const end = start + PAGE_SIZE
+            const visibleItems = groupedItems.slice(start, end)
+            return visibleItems.map((item, i) => (
+              <Accordion key={item.name} variant="separated">
+                <Accordion.Item value={`${item.name}-${i}`}>
+                  <Accordion.Control>
+                    <Text span fw={500}>{item.name}</Text>
+                    <Text span c="dimmed" ml="sm">({item.pieces.length})</Text>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <DataTable
+                      striped
+                      highlightOnHover
+                      withTableBorder
+                      verticalSpacing="sm"
+                      records={item.pieces}
+                      sortStatus={sortStatus}
+                      onSortStatusChange={setSortStatus}
+                      columns={groupColumns}
+                    />
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>
+            ))
+          })()}
+          {groupedItems.length > PAGE_SIZE && (
+            <Group justify="center" gap="sm" mt="sm">
+              <Button
+                variant="default"
+                size="xs"
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+              >
+                ←
+              </Button>
+              <Text size="sm" c="dimmed">
+                {page} / {Math.ceil(groupedItems.length / PAGE_SIZE)}
+              </Text>
+              <Button
+                variant="default"
+                size="xs"
+                disabled={page >= Math.ceil(groupedItems.length / PAGE_SIZE)}
+                onClick={() => setPage(p => p + 1)}
+              >
+                →
+              </Button>
+            </Group>
+          )}
+        </Stack>
+      ) : (
+        <DataTable
           striped
           highlightOnHover
           withTableBorder
@@ -120,61 +280,9 @@ export default function Repertoire() {
               ? t('repertoire.noPiecesTitle')
               : t('repertoire.noMatchFilters')
           }
-          columns={[
-            {
-              accessor: 'title',
-              title: t('repertoire.colTitle'),
-              sortable: true,
-              render: p => (
-                <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>
-                  {p.title}
-                </Anchor>
-              ),
-            },
-            {
-              accessor: 'composer',
-              title: t('repertoire.colComposer'),
-              sortable: true,
-              render: p => p.composer
-                ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
-                : '—',
-            },
-            {
-              accessor: 'opus',
-              title: t('repertoire.colOpus'),
-              sortable: true,
-              render: p => p.opus || '—',
-            },
-            {
-              accessor: 'number',
-              title: t('repertoire.colNumber'),
-              sortable: true,
-              render: p => p.number || '—',
-            },
-            {
-              accessor: 'difficulty',
-              title: t('repertoire.colDifficulty'),
-              sortable: true,
-              render: p => `${p.difficulty}/10`,
-            },
-            {
-              accessor: 'status',
-              title: t('repertoire.colStatus'),
-              sortable: true,
-              render: p => (
-                <Badge color={statusColor(p.status)} variant="light" radius="sm">
-                  {t(`status.${p.status}`)}
-                </Badge>
-              ),
-            },
-            {
-              accessor: 'last_played_at',
-              title: t('repertoire.colLastPlayed'),
-              sortable: true,
-              render: p => formatDate(p.last_played_at) ?? t('common.never'),
-            },
-          ]}
+          columns={groupColumns}
         />
+      )}
       {pieces.length === 0 && !status && !composerId && !search && (
         <Center>
           <Button onClick={() => navigate('/pieces/new')}>
