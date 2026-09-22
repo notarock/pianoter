@@ -14,7 +14,7 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:12
+        image: mariadb:13
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: pianoter
@@ -30,11 +30,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # --- Go backend ---
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: "1.27"
           cache: true
@@ -75,7 +75,7 @@ jobs:
           done
 
       - name: Run Cypress E2E tests
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7.4.4
         with:
           working-directory: web
           install: false
