@@ -33,17 +33,92 @@ describe('Add Piece form', () => {
     cy.contains('option', /chopin/i)
   })
 
-  it('submitting the form navigates to the piece detail page', () => {
-    cy.get('input[type="text"], input:not([type])').first().type('Für Elise')
+  it('submitting with all fields filled creates piece and navigates to detail', () => {
+    cy.get('input[type="text"], input:not([type])').first().type('Moonlight Sonata')
     cy.get('select').first().select('Ludwig van Beethoven')
+    cy.get('input[placeholder*="opus" i]').type('27')
+    cy.get('input[placeholder*="number" i]').type('2')
+    cy.get('input[type="number"]').clear().type('7')
+    cy.get('select').eq(1).select('active')
     cy.get('button[type="submit"]').click()
     cy.url().should('match', /\/pieces\/\d+$/)
-    cy.contains('h1', 'Für Elise')
+    cy.contains('h1', 'Moonlight Sonata')
+  })
+
+  it('submitting with default status (wishlist) works', () => {
+    cy.get('input[type="text"], input:not([type])').first().type('Clair de Lune')
+    cy.get('select').first().select('Claude Debussy')
+    cy.get('button[type="submit"]').click()
+    cy.url().should('match', /\/pieces\/\d+$/)
+    cy.contains(/wishlist/i)
+  })
+
+  it('submitting with shelved status works', () => {
+    cy.get('input[type="text"], input:not([type])').first().type('Nocturne')
+    cy.get('select').first().select('Frédéric Chopin')
+    cy.get('select').eq(1).select('shelved')
+    cy.get('button[type="submit"]').click()
+    cy.url().should('match', /\/pieces\/\d+$/)
+    cy.contains(/shelved/i)
+  })
+
+  it('submitting with learning status works', () => {
+    cy.get('input[type="text"], input:not([type])').first().type('Gymnopédie No. 1')
+    cy.get('select').first().select('Erik Satie')
+    cy.get('select').eq(1).select('learning')
+    cy.get('button[type="submit"]').click()
+    cy.url().should('match', /\/pieces\/\d+$/)
+    cy.contains(/learning/i)
   })
 
   it('Cancel button goes back without saving', () => {
+    cy.get('input[type="text"], input:not([type])').first().type('Should Not Persist')
     cy.contains('button', /cancel/i).click()
     cy.url().should('not.include', '/pieces/new')
+  })
+
+  it('composer dropdown includes system composers', () => {
+    cy.get('select').first().find('option').should('have.length.gte', 5)
+    cy.contains('option', /Bach/i)
+    cy.contains('option', /Beethoven/i)
+    cy.contains('option', /Chopin/i)
+  })
+
+  it('can set a start date using the date picker', () => {
+    cy.get('input[type="text"], input:not([type])').first().type('Test Piece')
+    cy.get('select').first().select('Ludwig van Beethoven')
+    // The date input exists
+    cy.get('input[placeholder*="date" i], input[placeholder*="start" i]').should('exist')
+    cy.get('button[type="submit"]').click()
+    cy.url().should('match', /\/pieces\/\d+$/)
+  })
+
+  it('can set opus and number fields', () => {
+    cy.get('input[type="text"], input:not([type])').first().type('Opus Test')
+    cy.get('select').first().select('Ludwig van Beethoven')
+    cy.get('input[placeholder*="opus" i]').type('27 bis')
+    cy.get('input[placeholder*="number" i]').type('3')
+    cy.get('button[type="submit"]').click()
+    cy.url().should('match', /\/pieces\/\d+$/)
+    cy.contains('h1', 'Opus Test')
+  })
+
+  it('can create piece with difficulty 10', () => {
+    cy.get('input[type="text"], input:not([type])').first().type('Hard Piece')
+    cy.get('select').first().select('Ludwig van Beethoven')
+    cy.get('input[type="number"]').clear().type('10')
+    cy.get('button[type="submit"]').click()
+    cy.url().should('match', /\/pieces\/\d+$/)
+    cy.contains('10/10')
+  })
+
+  it('can create piece with difficulty 1', () => {
+    cy.get('input[type="text"], input:not([type])').first().type('Easy Piece')
+    cy.get('select').first().select('Claude Debussy')
+    cy.get('input[type="number"]').clear().type('1')
+    cy.get('button[type="submit"]').click()
+    cy.url().should('match', /\/pieces\/\d+$/)
+    cy.contains('1/10')
   })
 })
 
@@ -90,6 +165,17 @@ describe('Piece Detail page', () => {
     cy.contains('Worked on the arpeggios')
   })
 
+  it('logging multiple practice sessions shows all of them', () => {
+    cy.contains('button', /log practice session/i).click()
+    cy.get('[placeholder*="notes" i]').type('First session notes')
+    cy.contains('button', /save/i).click()
+    cy.contains('button', /log practice session/i).click()
+    cy.get('[placeholder*="notes" i]').last().type('Second session notes')
+    cy.contains('button', /save/i).click()
+    cy.contains('First session notes')
+    cy.contains('Second session notes')
+  })
+
   it('Edit link navigates to the edit form', () => {
     cy.contains('a', /edit/i).click()
     cy.url().should('include', '/edit')
@@ -106,5 +192,24 @@ describe('Piece Detail page', () => {
     cy.get('input[type="text"], input:not([type])').first().clear().type('Für Elise')
     cy.contains('button', /save changes/i).click()
     cy.contains('h1', 'Für Elise')
+  })
+
+  it('navigating to repertoire from piece detail works', () => {
+    cy.contains('a', /repertoire/i).click()
+    cy.url().should('include', '/repertoire')
+    cy.contains(/repertoire/i)
+  })
+
+  it('navigating to composer from piece detail works', () => {
+    cy.contains('a', /Ludwig van Beethoven/i).click()
+    cy.url().should('include', '/composers/')
+    cy.contains('Ludwig van Beethoven')
+  })
+
+  it('can delete the piece', () => {
+    cy.contains('button', /delete/i).click()
+    // After delete, should redirect to repertoire
+    cy.url().should('include', '/repertoire')
+    cy.contains('Moonlight Sonata').should('not.exist')
   })
 })

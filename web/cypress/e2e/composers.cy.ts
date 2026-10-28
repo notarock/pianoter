@@ -65,4 +65,48 @@ describe('Composers page', () => {
     })
     cy.contains('ToDelete Composer').should('not.exist')
   })
+
+  it('can add composer without nationality', () => {
+    cy.contains('button', /add composer/i).click()
+    cy.get('input[placeholder*="name" i]').type('Anonymous Composer')
+    cy.get('input[placeholder*="born" i]').type('1800')
+    cy.contains('button', /^add$/i).click()
+    cy.contains('Anonymous Composer')
+  })
+
+  it('can add composer with only name', () => {
+    cy.contains('button', /add composer/i).click()
+    cy.get('input[placeholder*="name" i]').type('Minimal Composer')
+    cy.contains('button', /^add$/i).click()
+    cy.contains('Minimal Composer')
+  })
+
+  it('navigating to a composer shows their detail page', () => {
+    cy.contains('a', /Ludwig van Beethoven/i).click()
+    cy.url().should('include', '/composers/')
+    cy.contains('Ludwig van Beethoven')
+  })
+
+  it('navigating to dashboard from composers works', () => {
+    cy.contains('a', /dashboard/i).click()
+    cy.url().should('include', '/')
+    cy.contains(/welcome back/i)
+  })
+
+  it('system composers cannot be deleted', () => {
+    cy.contains('Ludwig van Beethoven').within(() => {
+      cy.contains('system')
+    })
+    // System composers should not have a delete button
+    cy.contains('Ludwig van Beethoven').within(() => {
+      cy.contains('button', /delete/i).should('not.exist')
+    })
+  })
+
+  it('adding a duplicate composer shows an error', () => {
+    cy.contains('button', /add composer/i).click()
+    cy.get('input[placeholder*="name" i]').type('Ludwig van Beethoven')
+    cy.contains('button', /^add$/i).click()
+    cy.contains(/already exists|error|conflict/i)
+  })
 })
