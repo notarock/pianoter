@@ -1,4 +1,17 @@
 const en = {
+  home: {
+    intro: 'Pianoter is a piano practice tracker. Organize your repertoire, log practice sessions, and follow each piece from hands separate to performance ready.',
+    openDashboard: 'Open dashboard',
+    example: 'Example repertoire',
+    features: 'Features',
+    repertoireTitle: 'Organize your repertoire',
+    repertoireDescription: 'Keep the pieces you want to learn, are working on, and already play in one place. Browse by composer and filter by status.',
+    practiceTitle: 'Record your practice',
+    practiceDescription: 'Log sessions and leave notes about what you worked on, so you can pick up where you left off next time.',
+    progressTitle: 'Follow your progress',
+    progressDescription: 'See how long each learning stage took and find pieces you haven’t played in a while with the “To Revisit” dashboard.',
+    source: 'Source on GitHub',
+  },
   nav: {
     dashboard: 'Dashboard',
     repertoire: 'Repertoire',

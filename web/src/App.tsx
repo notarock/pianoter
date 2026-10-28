@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, NavLink, Navigate, Link } from 'react-router-dom'
 import { AppShell, Group, Text, Anchor, Box, SegmentedControl, Stack } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import Dashboard from './pages/Dashboard'
@@ -9,6 +9,7 @@ import Composers from './pages/Composers'
 import ComposerDetail from './pages/ComposerDetail'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Home from './pages/Home'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -33,7 +34,8 @@ function Nav() {
         {/* Top row: brand + controls */}
         <Group px="xl" justify="space-between" wrap="nowrap" h={56}>
           {/* Brand */}
-          <Group gap="xs">
+           <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+           <Group gap="xs">
             <Text span style={{ fontSize: '1.4rem', lineHeight: 1 }}>P</Text>
             <Text
               fw={700}
@@ -46,13 +48,14 @@ function Nav() {
             >
               Pianoter
             </Text>
-          </Group>
+           </Group>
+           </Link>
 
           {/* Desktop nav links (hidden on mobile) */}
           {token && (
             <Group gap="xl" visibleFrom="sm">
               {[
-                { to: '/', label: t('nav.dashboard'), end: true },
+                { to: '/dashboard', label: t('nav.dashboard'), end: true },
                 { to: '/repertoire', label: t('nav.repertoire') },
                 { to: '/composers', label: t('nav.composers') },
               ].map(({ to, label, end }) => (
@@ -91,6 +94,7 @@ function Nav() {
                 { label: 'FR', value: 'fr' },
               ]}
             />
+            {!token && <Anchor component={Link} to="/login" size="sm" c="dark">{t('login.submitBtn')}</Anchor>}
             {user && (
               <>
                 <Text size="sm" c="dimmed" visibleFrom="sm">{user.username}</Text>
@@ -118,7 +122,7 @@ function Nav() {
             style={{ borderTop: '1px solid var(--app-border)' }}
           >
             {[
-              { to: '/', label: t('nav.dashboard'), end: true },
+              { to: '/dashboard', label: t('nav.dashboard'), end: true },
               { to: '/repertoire', label: t('nav.repertoire') },
               { to: '/composers', label: t('nav.composers') },
             ].map(({ to, label, end }) => (
@@ -153,28 +157,36 @@ function Nav() {
   )
 }
 
+function Layout() {
+  const { token } = useAuth()
+  return (
+    <AppShell header={{ height: { base: token ? 96 : 56, sm: 56 } }} bg="var(--app-bg)">
+      <Nav />
+      <AppShell.Main>
+        <Box maw={960} mx="auto" px={{ base: 'md', sm: 'xl' }} py="xl">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/repertoire" element={<ProtectedRoute><Repertoire /></ProtectedRoute>} />
+            <Route path="/pieces/new" element={<ProtectedRoute><PieceForm /></ProtectedRoute>} />
+            <Route path="/pieces/:id" element={<ProtectedRoute><PieceDetail /></ProtectedRoute>} />
+            <Route path="/pieces/:id/edit" element={<ProtectedRoute><PieceForm /></ProtectedRoute>} />
+            <Route path="/composers" element={<ProtectedRoute><Composers /></ProtectedRoute>} />
+            <Route path="/composers/:id" element={<ProtectedRoute><ComposerDetail /></ProtectedRoute>} />
+          </Routes>
+        </Box>
+      </AppShell.Main>
+    </AppShell>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppShell header={{ height: { base: 96, sm: 56 } }} bg="var(--app-bg)">
-          <Nav />
-          <AppShell.Main>
-            <Box maw={960} mx="auto" px="xl" py="xl">
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/repertoire" element={<ProtectedRoute><Repertoire /></ProtectedRoute>} />
-                <Route path="/pieces/new" element={<ProtectedRoute><PieceForm /></ProtectedRoute>} />
-                <Route path="/pieces/:id" element={<ProtectedRoute><PieceDetail /></ProtectedRoute>} />
-                <Route path="/pieces/:id/edit" element={<ProtectedRoute><PieceForm /></ProtectedRoute>} />
-                <Route path="/composers" element={<ProtectedRoute><Composers /></ProtectedRoute>} />
-                <Route path="/composers/:id" element={<ProtectedRoute><ComposerDetail /></ProtectedRoute>} />
-              </Routes>
-            </Box>
-          </AppShell.Main>
-        </AppShell>
+        <Layout />
       </AuthProvider>
     </BrowserRouter>
   )

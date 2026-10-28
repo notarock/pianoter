@@ -1,6 +1,13 @@
 describe('Authentication', () => {
-  it('redirects unauthenticated users to /login', () => {
+  it('shows the public home page', () => {
     cy.visit('/')
+    cy.contains('Pianoter is a piano practice tracker.')
+    cy.contains('a', 'Create an account').should('have.attr', 'href', '/register')
+    cy.contains('Example repertoire')
+  })
+
+  it('redirects unauthenticated users to /login', () => {
+    cy.visit('/dashboard')
     cy.url().should('include', '/login')
   })
 
@@ -40,7 +47,7 @@ describe('Authentication', () => {
 
   it('registers a new account and lands on the dashboard', () => {
     cy.registerAndLogin()
-    cy.url().should('eq', Cypress.config('baseUrl') + '/')
+    cy.url().should('eq', Cypress.config('baseUrl') + '/dashboard')
     cy.contains(/welcome back/i)
   })
 

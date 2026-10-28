@@ -18,7 +18,7 @@ Cypress.Commands.add('registerAndLogin', (username?: string, password = 'testpas
   cy.get('input[type="password"]').first().type(password)
   cy.get('input[type="password"]').last().type(password)
   cy.get('button[type="submit"]').click()
-  cy.url().should('eq', Cypress.config('baseUrl') + '/')
+  cy.url().should('eq', Cypress.config('baseUrl') + '/dashboard')
   return cy.wrap(user)
 })
 
@@ -30,7 +30,7 @@ Cypress.Commands.add('loginAs', (username: string, password = 'testpassword') =>
   cy.get('input[type="text"], input:not([type])').first().type(username)
   cy.get('input[type="password"]').first().type(password)
   cy.get('button[type="submit"]').click()
-  cy.url().should('eq', Cypress.config('baseUrl') + '/')
+  cy.url().should('eq', Cypress.config('baseUrl') + '/dashboard')
 })
 
 declare global {

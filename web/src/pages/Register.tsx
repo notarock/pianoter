@@ -26,7 +26,7 @@ export default function Register() {
     try {
       const res = await authApi.register(username, password)
       login(res.token, res.user)
-      navigate('/')
+      navigate('/dashboard')
     } catch {
       setError(t('register.errorFailed'))
     } finally {
@@ -36,7 +36,8 @@ export default function Register() {
 
   return (
     <Paper
-      w={400}
+      w="100%"
+      maw={400}
       mx="auto"
       mt={80}
       p="xl"

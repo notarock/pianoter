@@ -12,11 +12,11 @@ import { statusColor, formatDate } from '../utils'
 
 const PAGE_SIZE = 20
 
-export default function Repertoire() {
+export default function Repertoire({ exampleData }: { exampleData?: { pieces: Piece[]; composers: Composer[] } }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [pieces, setPieces] = useState<Piece[]>([])
-  const [composers, setComposers] = useState<Composer[]>([])
+  const [loadedPieces, setPieces] = useState<Piece[]>([])
+  const [loadedComposers, setComposers] = useState<Composer[]>([])
   const [status, setStatus] = useState('')
   const [composerId, setComposerId] = useState('')
   const [search, setSearch] = useState('')
@@ -29,20 +29,26 @@ export default function Repertoire() {
   })
 
   useEffect(() => {
+    if (exampleData) return
     api.composers.list().then(setComposers)
-  }, [])
+  }, [exampleData])
 
   useEffect(() => {
+    if (exampleData) return
     api.pieces
       .list({
         status: status || undefined,
         composer_id: composerId ? Number(composerId) : undefined,
       })
       .then(setPieces)
-  }, [status, composerId])
+  }, [status, composerId, exampleData])
 
   useEffect(() => { setPage(1) }, [status, composerId, search, sortStatus])
 
+  const pieces = useMemo(() => exampleData
+    ? exampleData.pieces.filter(p => (!status || p.status === status) && (!composerId || p.composer_id === Number(composerId)))
+    : loadedPieces, [exampleData, loadedPieces, status, composerId])
+  const composers = exampleData?.composers ?? loadedComposers
   const composerOptions = composers.map(c => ({ value: String(c.id), label: c.name }))
 
   const filtered = useMemo(() =>
@@ -95,7 +101,7 @@ export default function Repertoire() {
       accessor: 'title' as const,
       title: t('repertoire.colTitle'),
       sortable: true,
-      render: (p: Piece) => (
+      render: (p: Piece) => exampleData ? <Text fw={500}>{p.title}</Text> : (
         <Anchor component={Link} to={`/pieces/${p.id}`} c="dark" fw={500}>
           {p.title}
         </Anchor>
@@ -106,7 +112,9 @@ export default function Repertoire() {
       title: t('repertoire.colComposer'),
       sortable: true,
       render: (p: Piece) => p.composer
-        ? <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
+        ? exampleData
+          ? <Text c="dimmed" size="sm">{p.composer.name}</Text>
+          : <Anchor component={Link} to={`/composers/${p.composer.id}`} c="dimmed" size="sm">{p.composer.name}</Anchor>
         : '—',
     },
     {
@@ -148,7 +156,7 @@ export default function Repertoire() {
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="center">
-        <Title order={1} style={{ fontFamily: 'Playfair Display, serif' }}>{t('repertoire.title')}</Title>
+        <Title order={exampleData ? 2 : 1} style={{ fontFamily: 'Playfair Display, serif' }}>{t('repertoire.title')}</Title>
         <Group gap="sm">
           <SegmentedControl
             size="sm"
@@ -162,6 +170,7 @@ export default function Repertoire() {
           {grouped && (
             <NativeSelect
               value={groupBy}
+              aria-label={t('repertoire.groupBy')}
               onChange={e => { setGroupBy(e.target.value as typeof groupBy); setPage(1) }}
               data={[
                 { value: 'composer', label: t('repertoire.groupByComposer') },
@@ -172,12 +181,15 @@ export default function Repertoire() {
             />
           )}
         </Group>
-        <Button component={Link} to="/pieces/new">{t('repertoire.addPiece')}</Button>
+        {exampleData
+          ? <Button disabled>{t('repertoire.addPiece')}</Button>
+          : <Button component={Link} to="/pieces/new">{t('repertoire.addPiece')}</Button>}
       </Group>
 
       <Group gap="sm" wrap="wrap">
         <NativeSelect
           value={status}
+          aria-label={t('repertoire.colStatus')}
           onChange={e => setStatus(e.target.value)}
           data={[
             { value: '', label: t('repertoire.allStatuses') },
@@ -190,6 +202,7 @@ export default function Repertoire() {
         />
         <NativeSelect
           value={composerId}
+          aria-label={t('repertoire.colComposer')}
           onChange={e => setComposerId(e.target.value)}
           data={[
             { value: '', label: t('repertoire.allComposers') },
@@ -212,7 +225,7 @@ export default function Repertoire() {
             const end = start + PAGE_SIZE
             const visibleItems = groupedItems.slice(start, end)
             return visibleItems.map((item, i) => (
-              <Accordion key={item.name} variant="separated">
+              <Accordion key={item.name} variant="separated" defaultValue={exampleData && item.pieces.length > 1 ? `${item.name}-${i}` : undefined}>
                 <Accordion.Item value={`${item.name}-${i}`}>
                   <Accordion.Control>
                     <Text span fw={500}>{item.name}</Text>
@@ -279,7 +292,7 @@ export default function Repertoire() {
           columns={groupColumns}
         />
       )}
-      {pieces.length === 0 && !status && !composerId && !search && (
+      {!exampleData && pieces.length === 0 && !status && !composerId && !search && (
         <Center>
           <Button onClick={() => navigate('/pieces/new')}>
             {t('repertoire.addFirstPiece')}

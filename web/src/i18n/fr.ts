@@ -1,4 +1,17 @@
 const fr = {
+  home: {
+    intro: 'Pianoter est un outil de suivi de pratique du piano. Organisez votre répertoire, enregistrez vos séances et suivez chaque pièce, des mains séparées jusqu’à être prêt à jouer.',
+    openDashboard: 'Ouvrir le tableau de bord',
+    example: 'Exemple de répertoire',
+    features: 'Fonctionnalités',
+    repertoireTitle: 'Organisez votre répertoire',
+    repertoireDescription: 'Retrouvez les pièces que vous souhaitez apprendre, celles en cours et celles que vous jouez déjà. Parcourez-les par compositeur et filtrez-les par statut.',
+    practiceTitle: 'Gardez une trace de vos séances',
+    practiceDescription: 'Enregistrez vos séances et notez ce que vous avez travaillé pour reprendre là où vous en étiez la prochaine fois.',
+    progressTitle: 'Suivez vos progrès',
+    progressDescription: 'Consultez le temps passé à chaque étape et retrouvez les pièces délaissées depuis un moment dans la section « À revoir » du tableau de bord.',
+    source: 'Code source sur GitHub',
+  },
   nav: {
     dashboard: 'Tableau de bord',
     repertoire: 'Répertoire',

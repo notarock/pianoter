@@ -21,7 +21,7 @@ export default function Login() {
     try {
       const res = await authApi.login(username, password)
       login(res.token, res.user)
-      navigate('/')
+      navigate('/dashboard')
     } catch {
       setError(t('login.errorInvalid'))
     } finally {
@@ -31,7 +31,8 @@ export default function Login() {
 
   return (
     <Paper
-      w={420}
+      w="100%"
+      maw={420}
       mx="auto"
       mt={80}
       p="xl"
